@@ -76,6 +76,14 @@ msgctxt "#30013"
 msgid "End time increased by "
 msgstr ""
 
+msgctxt "#30017"
+msgid "Recorded TV folder not found"
+msgstr ""
+
+msgctxt "#30018"
+msgid "Recorded TV folder cannot be opened"
+msgstr ""
+
 msgctxt "#30020"
 msgid "All tuners for this channel are busy"
 msgstr ""

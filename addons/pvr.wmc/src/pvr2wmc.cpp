@@ -103,11 +103,27 @@ const char *Pvr2Wmc::GetBackendVersion(void)
 		vector<CStdString> results = _socketClient.GetVector(request, true);
 		if (results.size() > 1)
 		{
-			_serverBuild = atoi(results[1]);
-			return results[0].c_str();
+			_serverBuild = atoi(results[1]);			// get server build number for feature checking
 		}
+		// check if recorded tv folder is accessible from client
+        if (results.size() > 2 && results[2] != "")		// if server sends empty string, skip check
+        {
+            if (!XBMC->DirectoryExists(results[2]))
+			{
+				XBMC->Log(LOG_ERROR, "Recorded tv '%s' does not exist", results[2].c_str());
+				CStdString infoStr = XBMC->GetLocalizedString(30017);		
+				XBMC->QueueNotification(QUEUE_ERROR, infoStr.c_str());
+			}
+			else if (!XBMC->CanOpenDirectory(results[2]))
+			{
+				XBMC->Log(LOG_ERROR, "Recorded tv '%s' count not be opened", results[2].c_str());
+				CStdString infoStr = XBMC->GetLocalizedString(30018);		
+				XBMC->QueueNotification(QUEUE_ERROR, infoStr.c_str());
+			}
+        }
+		return (results.size() > 1) ? results[0].c_str() : "0.0";	// return server version to caller
 	}
-	return "0.0";
+	return "Not accessible";	//  server version check failed
 }
 
 int Pvr2Wmc::GetChannelsAmount(void)
