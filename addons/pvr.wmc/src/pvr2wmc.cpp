@@ -338,37 +338,6 @@ int Pvr2Wmc::GetTimersAmount(void)
 	return _socketClient.GetInt("GetTimerCount", true);
 }
 
-#ifdef TARGET_WINDOWS
-UINT_PTR _recTimer = null;					// holds the recording update timer
-
-// this function is a callback for Pvr2Wmc::UpdateRecordingTimer
-VOID CALLBACK RecUpdateTimerFunc( 
-    HWND hwnd,        // handle to window for timer messages 
-    UINT message,     // WM_TIMER message 
-    UINT idTimer,     // timer identifier 
-    DWORD dwTime)     // current system time 
-{ 
-	PVR->TriggerRecordingUpdate();			// tell xbmc to update recordings display
-	assert(KillTimer(NULL, idTimer));		// stop timer from going again
-	_recTimer = null;
-	XBMC->Log(LOG_DEBUG, "Recording Files updated by function timer");
-}
-
-// activate recording file update after the input number of msec
-void Pvr2Wmc::UpdateRecordingTimer(int msec)
-{
-	if (_recTimer == null)			// if timer is already running do nothing
-	{
-		_recTimer = SetTimer(
-			null,					// hWnd
-			0,						// id (if hWnd is null, the id is assigned)
-			msec,					// time till timer goes off
-			RecUpdateTimerFunc		// update rec file function
-		);
-	}
-}
-#endif
-
 PVR_ERROR Pvr2Wmc::AddTimer(const PVR_TIMER &xTmr)  
 {
 	if (IsServerDown())
@@ -476,9 +445,11 @@ PVR_ERROR Pvr2Wmc::AddTimer(const PVR_TIMER &xTmr)
 
 				if (splitResult[0] == "recordingNow")					// recording is active now
 				{
-#ifdef TARGET_WINDOWS
-					UpdateRecordingTimer(10000);						// give time for the recording to start, then update recordings list
-#endif
+					XBMC->Log(LOG_DEBUG, "timer recording is in progress");
+				}
+				else if (splitResult[0] == "recordingNowTimedOut")		// swmc timed out waiting for the recording to start
+				{
+					XBMC->Log(LOG_DEBUG, "server timed out waiting for in-progress recording to start");
 				}
 				else if (splitResult[0] == "recordingChannel")			// service picked a different channel for timer
 				{
