@@ -35,8 +35,6 @@ using namespace PLATFORM;
 #define STRCPY(dest, src) strncpy(dest, src, sizeof(dest)-1); 
 #define FOREACH(ss, vv) for(std::vector<CStdString>::iterator ss = vv.begin(); ss != vv.end(); ++ss)
 
-#define FAKE_TS_LENGTH 2000000			// a fake file length for give to xbmc (used to insert duration headers)
-
 int64_t _lastRecordingUpdateTime;		// the time of the last recording display update
 
 
@@ -56,9 +54,6 @@ Pvr2Wmc::Pvr2Wmc(void)
 
 	_initialStreamResetCnt = 0;		// used to count how many times we reset the stream position (due to 2 pass demuxer)
 	_initialStreamPosition = 0;     // used to set an initial position (multiple clients watching the same live tv buffer)
-	
-	_insertDurationHeader = false;	// if true, insert a duration header for active Rec TS file
-	_durationHeader = "";			// the header to insert (received from server)
 	
 	_lastRecordingUpdateTime = 0;	// time of last recording display update
 	_lostStream = false;			// set to true if stream is lost
@@ -741,6 +736,7 @@ bool Pvr2Wmc::OpenLiveStream(const PVR_CHANNEL &channel)
 			_initialStreamPosition = atoll(results[2]);
 		}
 
+
 		_streamFile = XBMC->OpenFile(_streamFileName.c_str(), 0);	// open the video file for streaming, same handle
 
 		if (!_streamFile)	// something went wrong
@@ -766,7 +762,6 @@ bool Pvr2Wmc::OpenLiveStream(const PVR_CHANNEL &channel)
 		_lostStream = false;						// if we got to here, stream started ok, so set default values
 		_lastStreamSize = 0;
 		_isStreamFileGrowing = true;
-		_insertDurationHeader = false;				// only used for active recordings
 		return true;								// stream is up
 	}
 }
@@ -823,31 +818,6 @@ int Pvr2Wmc::ReadLiveStream(unsigned char *pBuffer, unsigned int iBufferSize)
 		}
 
 		long long currentPos = PositionLiveStream();	// get the current file position
-
-		// this is a hack to set the time duration of an ACTIVE recording file. Xbmc reads the ts duration by looking for timestamps
-		// (pts/dts) toward the end of the ts file.  Since our ts file is very small at the start, xbmc skips trying to get the duration
-		// and just sets it to zero, this makes FF,RW,Skip work poorly and gives bad OSD feedback during playback.  The hack is 
-		// to tell xbmc that the ts file is 'FAKE_TS_LENGTH' in length at the start of the playback (see LengthLiveStream).  Then when xbmc 
-		// tries to read the duration by probing the end of the file (it starts looking at fileLength-250k), we catch this read below and feed
-		// it a packet that contains a pts with the duration we want (this packet header is received from the server).  After this, everything 
-		// is set back to normal.
-		if (_insertDurationHeader && FAKE_TS_LENGTH - 250000 == currentPos) // catch xbmc probing for timestamps at end of file
-		{
-			//char pcr[16] = {0x47, 0x51, 0x00, 0x19, 0x00, 0x00, 0x01, 0xBD, 0x00, 0x00, 0x85, 0x80, 0x05, 0x21, 0x2E, 0xDF};
-			_insertDurationHeader = false;									// only do header insertion once
-			memset(pBuffer, 0xFF, iBufferSize);								// set buffer to all FF (default padding char for packets)
-			vector<CStdString> v = split(_durationHeader, " ");				// get header bytes by unpacking reponse
-			for (int i=0; i<16; i++)										// insert header bytes, creating a fake packet at start of buffer
-			{
-				//*(pBuffer + i) = pcr[i];
-				*(pBuffer + i) = (char)strtol(v[i].c_str(), NULL, 16);
-			}
-			return iBufferSize;											// terminate read here
-		} 
-		// in case something goes wrong, turn off fake header insertion flag.
-		// the header insertion usually happens around _readCnt=21, so 50 should be safe
-		if (_readCnt > 50)
-			_insertDurationHeader = false;
 
 		long long fileSize = _lastStreamSize;			// use the last fileSize found, rather than querying host
 
@@ -974,8 +944,6 @@ long long Pvr2Wmc::ActualFileSize(int count)
 // return the length of the current stream file
 long long Pvr2Wmc::LengthLiveStream(void) 
 {
-	if (_insertDurationHeader)			// if true, return a fake file 2Mb length to xbmc, this makes xbmc try to determine
-		return FAKE_TS_LENGTH;			// the ts time duration giving us a chance to insert the real duration
 	if (_lastStreamSize > 0)
 		return _lastStreamSize;
 	return -1;
@@ -1042,15 +1010,9 @@ bool Pvr2Wmc::OpenRecordedStream(const PVR_RECORDING &recording)
 
 		if (results.size() > 3 && results[3] != "")											// get header to set duration of ts file
 		{
-			_durationHeader = results[3];													
-			_insertDurationHeader = true;
+			// contains gotham duration header, but used in frodo
 		}
-		else
-		{
-			_durationHeader = "";
-			_insertDurationHeader = false;
-		}
-
+		
 		_streamFile = XBMC->OpenFile(_streamFileName.c_str(), 0);	// open the video file for streaming, same handle
 
 		if (!_streamFile)	// something went wrong

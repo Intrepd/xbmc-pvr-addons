@@ -108,6 +108,4 @@ private:
 	int _initialStreamResetCnt;			// used to count how many times we reset the stream position (due to 2 pass demuxer)
 	long long _initialStreamPosition;	// used to set an initial position (multiple clients watching the same live tv buffer)
 
-	bool _insertDurationHeader;			// if true, insert a duration header for active Rec TS file
-	CStdString _durationHeader;			// the header to insert (received from server)
 };
