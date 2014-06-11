@@ -123,6 +123,12 @@ const char *Pvr2Wmc::GetBackendVersion(void)
 				XBMC->QueueNotification(QUEUE_ERROR, infoStr.c_str());
 			}
         }
+		// check if server returned it's MAC address
+		if (results.size() > 3 && results[3] != "" && g_strServerMAC == "")
+		{
+			XBMC->Log(LOG_INFO, "Setting ServerWMC Server MAC Address to '%s'", results[3].c_str());
+			g_strServerMAC = results[3];
+		}
 		return (results.size() > 1) ? results[0].c_str() : "0.0";	// return server version to caller
 	}
 	return "Not accessible";	//  server version check failed

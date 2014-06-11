@@ -32,6 +32,7 @@ using namespace ADDON;
 #endif
 
 #define DEFAULT_PORT 9080
+#define DEFAULT_WAKEONLAN_ENABLE false
 #define DEFAULT_SIGNAL_ENABLE false
 #define DEFAULT_SIGNAL_THROTTLE 10
 #define DEFAULT_MULTI_RESUME true
@@ -46,6 +47,8 @@ PVR_MENUHOOK	*menuHook       = NULL;
 CStdString		g_strServerName;							// the name of the server to connect to
 CStdString		g_strClientName;							// the name of the computer running addon
 int				g_port;
+bool			g_bWakeOnLAN;								// whether to send wake on LAN to server
+CStdString		g_strServerMAC;								// MAC address of server
 bool			g_bSignalEnable;
 int				g_signalThrottle;
 bool			g_bEnableMultiResume;
@@ -74,6 +77,8 @@ extern "C" {
 			return;
 
 		g_strServerName = LOCALHOST;			// either "mediaserver" OR "." / "127.0.0.1"
+		g_strServerMAC = "";
+		g_bWakeOnLAN = false;
 		g_port = DEFAULT_PORT;
 		g_bSignalEnable = DEFAULT_SIGNAL_ENABLE;
 		g_signalThrottle = DEFAULT_SIGNAL_THROTTLE;
@@ -93,6 +98,20 @@ extern "C" {
 		else
 		{
 			XBMC->Log(LOG_ERROR, "Couldn't get 'host' setting, using '127.0.0.1'");
+		}
+
+		if (!XBMC->GetSetting("wake_on_lan", &g_bWakeOnLAN))
+		{
+			XBMC->Log(LOG_ERROR, "Couldn't get 'wake_on_lan' setting, using '%s'", DEFAULT_WAKEONLAN_ENABLE);
+		}
+
+		if (XBMC->GetSetting("host_mac", &buffer))
+		{ 
+			g_strServerMAC = buffer;
+		}
+		else
+		{
+			XBMC->Log(LOG_ERROR, "Couldn't get 'host_mac' setting, using empty value");
 		}
 
 		if (!XBMC->GetSetting("signal", &g_bSignalEnable))

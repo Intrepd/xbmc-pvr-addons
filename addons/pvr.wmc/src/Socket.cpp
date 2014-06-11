@@ -613,6 +613,15 @@ std::vector<CStdString> Socket::GetVector(const CStdString &request, bool allowR
 			{
 				XBMC->Log(LOG_ERROR, "Socket::GetVector> Server is down");
 				reponses.push_back("ServerDown");					// set a server down error message (not fatal)
+
+				if (allowRetry && cntAttempts < maxAttempts)
+				{
+					// Attempt wake on LAN if connection failed and we are going to retry
+					if (g_bWakeOnLAN && g_strServerMAC != "")
+					{
+						XBMC->WakeOnLan(g_strServerMAC);
+					}
+				}
 			}
 			else													// connected to server
 			{

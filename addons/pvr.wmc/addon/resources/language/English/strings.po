@@ -43,7 +43,6 @@ msgctxt "#30005"
 msgid "Tuner is needed for recording"
 msgstr ""
 
-
 msgctxt "#30006"
 msgid "Recording delete failed, file in use or write protected"
 msgstr ""
@@ -119,6 +118,14 @@ msgstr ""
 msgctxt "#30024"
 msgid "Recording stream exited early"
 msgstr ""
+
+msgctxt "#30025"
+msgid "Use Wake On LAN to wake up Server"
+msgstr ""
+
+msgctxt "#30026"
+msgid "Server MAC Address for Wake on LAN"
+msgstr "Leave blank for auto detect"
 
 msgctxt "#30027"
 msgid "Time drift between client and backend of %s minutes"
