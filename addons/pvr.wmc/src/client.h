@@ -40,5 +40,6 @@ extern bool								g_bEnableMultiResume;
 extern ADDON::CHelper_libXBMC_addon		*XBMC;
 extern CHelper_libXBMC_pvr				*PVR;
 extern CHelper_libXBMC_gui				*GUI;
-extern CStdString g_strServerMAC;
-extern bool g_bWakeOnLAN;
+extern CStdString						g_strServerMAC;
+extern bool								g_bWakeOnLAN;
+extern CStdString						g_AddonDataCustom;

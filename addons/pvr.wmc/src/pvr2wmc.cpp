@@ -124,10 +124,13 @@ const char *Pvr2Wmc::GetBackendVersion(void)
 			}
         }
 		// check if server returned it's MAC address
-		if (results.size() > 3 && results[3] != "" && g_strServerMAC == "")
+		if (results.size() > 3 && results[3] != "" && g_strServerMAC == "" && results[3] != g_strServerMAC)
 		{
 			XBMC->Log(LOG_INFO, "Setting ServerWMC Server MAC Address to '%s'", results[3].c_str());
 			g_strServerMAC = results[3];
+		
+			// Attempt to save MAC address to custom addon data
+			WriteFileContents(g_AddonDataCustom, g_strServerMAC);
 		}
 		return (results.size() > 1) ? results[0].c_str() : "0.0";	// return server version to caller
 	}

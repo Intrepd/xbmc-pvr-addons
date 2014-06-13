@@ -22,6 +22,7 @@
 #include "client.h"
 #include "xbmc_pvr_dll.h"
 #include "pvr2wmc.h"
+#include "utilities.h"
 #include "platform/util/util.h"
 
 using namespace std;
@@ -60,6 +61,7 @@ CStdString		g_clientOS;									// OS of client, passed to server
 */
 CStdString g_strUserPath             = "";
 CStdString g_strClientPath           = "";
+CStdString		g_AddonDataCustom	= "";					// location of custom addondata settings file
 
 CHelper_libXBMC_addon *XBMC           = NULL;
 CHelper_libXBMC_pvr   *PVR            = NULL;
@@ -105,13 +107,15 @@ extern "C" {
 			XBMC->Log(LOG_ERROR, "Couldn't get 'wake_on_lan' setting, using '%s'", DEFAULT_WAKEONLAN_ENABLE);
 		}
 
-		if (XBMC->GetSetting("host_mac", &buffer))
-		{ 
-			g_strServerMAC = buffer;
+		CStdString fileContent;
+		if (ReadFileContents(g_AddonDataCustom, fileContent))
+		{
+			g_strServerMAC = fileContent;
+			XBMC->Log(LOG_ERROR, "Using ServerWMC MAC address from custom addondata '%s'", g_strServerMAC);
 		}
 		else
 		{
-			XBMC->Log(LOG_ERROR, "Couldn't get 'host_mac' setting, using empty value");
+			XBMC->Log(LOG_ERROR, "Couldn't get ServerWMC MAC address from custom addondata '%s', using empty value", g_strServerMAC);
 		}
 
 		if (!XBMC->GetSetting("signal", &g_bSignalEnable))
@@ -192,6 +196,7 @@ extern "C" {
 		_CurStatus     = ADDON_STATUS_UNKNOWN;
 		g_strUserPath   = pvrprops->strUserPath;
 		g_strClientPath = pvrprops->strClientPath;
+		g_AddonDataCustom = g_strUserPath + "ServerMACAddr.txt";
 
 		ADDON_ReadSettings();
 
