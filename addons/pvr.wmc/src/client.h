@@ -44,4 +44,10 @@ extern CStdString						g_strServerMAC;
 extern bool								g_bWakeOnLAN;
 extern CStdString						g_AddonDataCustom;
 
-extern bool								g_BackendOnline;
+enum backend_status
+  {
+    BACKEND_UNKNOWN,
+    BACKEND_DOWN,
+    BACKEND_UP
+  };
+extern backend_status					g_BackendOnline;

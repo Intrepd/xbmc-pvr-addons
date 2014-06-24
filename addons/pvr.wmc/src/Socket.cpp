@@ -610,25 +610,28 @@ std::vector<CStdString> Socket::GetVector(const CStdString &request, bool allowR
 		else														// socket created OK
 		{
 			// Attempt Wake On Lan
-			if (!g_BackendOnline && allowWOL && g_bWakeOnLAN && g_strServerMAC != "")
+			if (g_BackendOnline != BACKEND_UP && allowWOL && g_bWakeOnLAN && g_strServerMAC != "")
 			{
 				XBMC->Log(LOG_INFO, "Socket::GetVector> Sending WOL packet to %s", g_strServerMAC.c_str());
-				CStdString infoStr = XBMC->GetLocalizedString(30026);		
-				XBMC->QueueNotification(QUEUE_INFO, infoStr.c_str());	// Notify WOL is being sent
+				if (g_BackendOnline != BACKEND_UNKNOWN)
+				{
+					CStdString infoStr = XBMC->GetLocalizedString(30026);		
+					XBMC->QueueNotification(QUEUE_INFO, infoStr.c_str());	// Notify WOL is being sent
+				}
 				XBMC->WakeOnLan(g_strServerMAC);						// Send WOL request
 			}
 
 			if (!connect(_serverName, (unsigned short)_port))	// if this fails, it is likely due to server down
 			{
 				// Failed to connect
-				g_BackendOnline = false;
+				g_BackendOnline = BACKEND_DOWN;
 				XBMC->Log(LOG_ERROR, "Socket::GetVector> Server is down");
 				reponses.push_back("ServerDown");					// set a server down error message (not fatal)
 			}
 			else
 			{
 				// Connected OK
-				g_BackendOnline = true;
+				g_BackendOnline = BACKEND_UP;
 				int bytesSent = SendRequest(request.c_str());		// send request to server
 
 				if (bytesSent > 0)									// if request was sent successfully

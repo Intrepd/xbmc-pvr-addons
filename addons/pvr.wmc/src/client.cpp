@@ -55,7 +55,7 @@ int				g_signalThrottle;
 bool			g_bEnableMultiResume;
 CStdString		g_clientOS;									// OS of client, passed to server
 
-bool			g_BackendOnline;							// whether the backend is online
+backend_status	g_BackendOnline;							// whether the backend is online
 
 /* User adjustable settings are saved here.
 * Default values are defined inside client.h
