@@ -262,11 +262,11 @@ bool Socket::connect ( const CStdString& host, const unsigned short port )
 		return false;
 	}
 
+	XBMC->Log(LOG_DEBUG, "Socket::connect %s:%u\n", host.c_str(), port);
 	int status = ::connect ( _sd, reinterpret_cast<sockaddr*>(&_sockaddr), sizeof ( _sockaddr ) );
 
 	if ( status == SOCKET_ERROR )
 	{
-		XBMC->Log(LOG_ERROR, "Socket::connect %s:%u\n", host.c_str(), port);
 		errormessage( getLastError(), "Socket::connect" );
 		return false;
 	}
@@ -655,6 +655,7 @@ std::vector<CStdString> Socket::GetVector(const CStdString &request, bool allowR
 					}
 					else
 					{
+						XBMC->Log(LOG_DEBUG, "Socket::GetVector> Response OK");
 						break;
 					}
 				}
