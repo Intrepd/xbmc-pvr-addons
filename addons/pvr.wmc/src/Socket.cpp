@@ -586,10 +586,11 @@ void Socket::SetTimeOut(int tSec)
 	_timeout = tSec;
 }
 
-std::vector<CStdString> Socket::GetVector(const CStdString &request, bool allowRetry)
+std::vector<CStdString> Socket::GetVector(const CStdString &request, bool allowRetry, bool allowWOL /* = true*/)
 {
+	int wolWaitSec = 15;
 	int maxAttempts = 3;
-	int sleepAttempts = 1000;
+	int sleepAttemptsMs = 1000;
 
 	PLATFORM::CLockObject lock(m_mutex);						// only process one request at a time
 
@@ -609,21 +610,38 @@ std::vector<CStdString> Socket::GetVector(const CStdString &request, bool allowR
 		}
 		else														// socket created OK
 		{
-			if (!connect(_serverName, (unsigned short)_port))		// if this fails, it is likely due to server down
+			bool connected = false;
+			connected = connect(_serverName, (unsigned short)_port);	// if this fails, it is likely due to server down
+			if (!connected)
 			{
+				// Failed to connect
 				XBMC->Log(LOG_ERROR, "Socket::GetVector> Server is down");
 				reponses.push_back("ServerDown");					// set a server down error message (not fatal)
 
-				if (allowRetry && cntAttempts < maxAttempts)
+				// Attempt Wake On Lan
+				if (allowWOL && g_bWakeOnLAN && g_strServerMAC != "")
 				{
-					// Attempt wake on LAN if connection failed and we are going to retry
-					if (g_bWakeOnLAN && g_strServerMAC != "")
+					XBMC->Log(LOG_INFO, "Socket::GetVector> Sending WOL packet to %s", g_strServerMAC.c_str());
+					CStdString infoStr = XBMC->GetLocalizedString(30026);		
+					XBMC->QueueNotification(QUEUE_INFO, infoStr.c_str());	// Notify WOL is being sent
+
+					// Send Wake On Lan
+					XBMC->WakeOnLan(g_strServerMAC);						// Send WOL request
+					time_t wolTime = time(NULL);							// Store time that WOL was sent
+					int wolWaitedSec = 0;
+
+					// Wait for up to WOL delay, attempting to reconnect every second
+					while (!connected && (wolWaitedSec < wolWaitSec))	
 					{
-						XBMC->WakeOnLan(g_strServerMAC);
+						usleep(1000 * 1000);
+						connected = connect(_serverName, (unsigned short)_port);
+
+						wolWaitedSec = time(NULL) - wolTime;
 					}
 				}
 			}
-			else													// connected to server
+
+			if (connected)											// connected to server
 			{
 				int bytesSent = SendRequest(request.c_str());		// send request to server
 
@@ -654,36 +672,36 @@ std::vector<CStdString> Socket::GetVector(const CStdString &request, bool allowR
 		}
 
 		cntAttempts++;
-		XBMC->Log(LOG_DEBUG, "Socket::GetVector> Retrying in %ims", sleepAttempts);
-		usleep(sleepAttempts);
+		XBMC->Log(LOG_DEBUG, "Socket::GetVector> Retrying in %ims", sleepAttemptsMs);
+		usleep(sleepAttemptsMs * 1000);
 	}
 
 	close();													// close socket
 	return reponses;											// return responses
 }
 
-CStdString Socket::GetString(const CStdString &request, bool allowRetry)
+CStdString Socket::GetString(const CStdString &request, bool allowRetry, bool allowWOL /* = true*/)
 {
-	std::vector<CStdString> result = GetVector(request, allowRetry);
+	std::vector<CStdString> result = GetVector(request, allowRetry, allowWOL);
 	return result[0];
 }
 
-bool Socket::GetBool(const CStdString &request, bool allowRetry)
+bool Socket::GetBool(const CStdString &request, bool allowRetry, bool allowWOL /* = true*/)
 {
-	return GetString(request, allowRetry) == "True";
+	return GetString(request, allowRetry, allowWOL) == "True";
 }
 
 
-int Socket::GetInt(const CStdString &request, bool allowRetry)
+int Socket::GetInt(const CStdString &request, bool allowRetry, bool allowWOL /* = true*/)
 {
-	CStdString valStr = GetString(request, allowRetry);
+	CStdString valStr = GetString(request, allowRetry, allowWOL);
 	long val = strtol(valStr, 0, 10);
 	return val;
 }
 
-long long Socket::GetLL(const CStdString &request, bool allowRetry)
+long long Socket::GetLL(const CStdString &request, bool allowRetry, bool allowWOL /* = true*/)
 {
-	CStdString valStr = GetString(request, allowRetry);
+	CStdString valStr = GetString(request, allowRetry, allowWOL);
 #ifdef TARGET_WINDOWS
 		long long val = _strtoi64(valStr, 0, 10);
 #else

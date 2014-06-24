@@ -120,7 +120,11 @@ msgid "Recording stream exited early"
 msgstr ""
 
 msgctxt "#30025"
-msgid "Use Wake On LAN to wake up Server"
+msgid "Use WakeOnLAN to wake up server"
+msgstr ""
+
+msgctxt "#30026"
+msgid "Sending WakeOnLAN to server..."
 msgstr ""
 
 msgctxt "#30027"
