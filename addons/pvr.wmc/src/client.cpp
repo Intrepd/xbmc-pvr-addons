@@ -111,11 +111,11 @@ extern "C" {
 		if (ReadFileContents(g_AddonDataCustom, fileContent))
 		{
 			g_strServerMAC = fileContent;
-			XBMC->Log(LOG_ERROR, "Using ServerWMC MAC address from custom addondata '%s'", g_strServerMAC);
+			XBMC->Log(LOG_ERROR, "Using ServerWMC MAC address from custom addondata '%s'", g_strServerMAC.c_str());
 		}
 		else
 		{
-			XBMC->Log(LOG_ERROR, "Couldn't get ServerWMC MAC address from custom addondata '%s', using empty value", g_strServerMAC);
+			XBMC->Log(LOG_ERROR, "Couldn't get ServerWMC MAC address from custom addondata, using empty value");
 		}
 
 		if (!XBMC->GetSetting("signal", &g_bSignalEnable))
