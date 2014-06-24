@@ -123,10 +123,6 @@ msgctxt "#30025"
 msgid "Use Wake On LAN to wake up Server"
 msgstr ""
 
-msgctxt "#30026"
-msgid "Server MAC Address for Wake on LAN"
-msgstr "Leave blank for auto detect"
-
 msgctxt "#30027"
 msgid "Time drift between client and backend of %s minutes"
 msgstr ""
