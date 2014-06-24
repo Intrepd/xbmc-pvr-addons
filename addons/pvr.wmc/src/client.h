@@ -43,3 +43,5 @@ extern CHelper_libXBMC_gui				*GUI;
 extern CStdString						g_strServerMAC;
 extern bool								g_bWakeOnLAN;
 extern CStdString						g_AddonDataCustom;
+
+extern bool								g_BackendOnline;
