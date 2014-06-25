@@ -1,0 +1,461 @@
+<window>
+  <defaultcontrol always="true">10</defaultcontrol>
+  <coordinates>
+    <system>1</system>
+    <posx>240</posx>
+    <posy>100</posy>
+  </coordinates>
+  <include>dialogeffect</include>
+  <controls>
+    <control type="image">
+      <description>background image</description>
+      <posx>0</posx>
+      <posy>0</posy>
+      <width>800</width>
+      <height>605</height>
+      <texture border="40">DialogBack.png</texture>
+    </control>
+    <control type="image">
+      <description>Dialog Header image</description>
+      <posx>40</posx>
+      <posy>16</posy>
+      <width>720</width>
+      <height>40</height>
+      <texture>dialogheader.png</texture>
+    </control>
+    <control type="label">
+      <description>header label</description>
+      <posx>40</posx>
+      <posy>20</posy>
+      <width>720</width>
+      <height>30</height>
+      <font>font13_title</font>
+      <label>$ADDON[pvr.wmc 30100]</label>
+      <align>center</align>
+      <aligny>center</aligny>
+      <textcolor>selected</textcolor>
+      <shadowcolor>black</shadowcolor>
+    </control>
+    <control type="button" id="22">
+      <description>Close Window button</description>
+      <posx>710</posx>
+      <posy>15</posy>
+      <width>64</width>
+      <height>32</height>
+      <label>-</label>
+      <font>-</font>
+      <!--<onclick>PreviousMenu</onclick>-->
+      <texturefocus>DialogCloseButton-focus.png</texturefocus>
+      <texturenofocus>DialogCloseButton.png</texturenofocus>
+      <onleft>10</onleft>
+      <onright>10</onright>
+      <onup>10</onup>
+      <ondown>10</ondown>
+      <visible>system.getbool(input.enablemouse)</visible>
+    </control>
+
+    <control type="label" description="program title" id = "20">
+      <posx>40</posx>
+      <posy>60</posy>
+      <width>720</width>
+      <height>30</height>
+      <font>font13_title</font>
+      <!--<label>filled in by code</label>-->
+      <align>left</align>
+      <aligny>center</aligny>
+      <textcolor>white</textcolor>
+      <!--<shadowcolor>black</shadowcolor>-->
+    </control>
+    
+    <control type="group" description ="series-episode radio buttons">
+      <posx>40</posx>
+      <posy>100</posy>
+      <width>320</width>
+      <height>100</height>
+      <control type="radiobutton" id="10">
+        <description>episode recording</description>
+        <posx>0</posx>
+        <posy>0</posy>
+        <height>40</height>
+        <width>350</width>
+        <label>$ADDON[pvr.wmc 30101]</label>
+        <font>font13</font>
+        <textcolor>grey2</textcolor>
+        <focusedcolor>white</focusedcolor>
+        <texturenofocus border="5">button-nofocus.png</texturenofocus>
+        <texturefocus border="5">button-focus2.png</texturefocus>
+        <onright>10</onright>
+        <onleft>10</onleft>
+        <onup>1</onup>
+        <ondown>11</ondown>
+      </control>
+
+      <control type="radiobutton" id="11">
+        <description>series recording</description>
+        <posx>0</posx>
+        <posy>45</posy>
+        <height>40</height>
+        <width>350</width>
+        <label>$ADDON[pvr.wmc 30102]</label>
+        <font>font13</font>
+        <textcolor>grey2</textcolor>
+        <focusedcolor>white</focusedcolor>
+        <texturenofocus border="5">button-nofocus.png</texturenofocus>
+        <texturefocus border="5">button-focus2.png</texturefocus>
+        <onright>11</onright>
+        <onleft>11</onleft>
+        <onup>10</onup>
+        <ondown>12</ondown>
+      </control>
+    </control>
+
+    <control type="label" description="detailed settings">
+      <posx>40</posx>
+      <posy>195</posy>
+      <width>720</width>
+      <height>30</height>
+      <font>font13</font>
+      <label>Detailed Settings:</label>
+      <align>left</align>
+      <aligny>center</aligny>
+      <textcolor>white</textcolor>
+      <!--<shadowcolor>black</shadowcolor>-->
+    </control>
+    
+    <control type="group" descripton="padding, keepTime">
+      <posx>80</posx>
+      <posy>230</posy>
+      <width>420</width>
+      <height>150</height>
+      <control type="spincontrolex" id="112">
+        <description>pre-padding amount</description>
+        <posx>0</posx>
+        <posy>0</posy>
+        <width>420</width>
+        <height>40</height>
+        <font>font13</font>
+        <textcolor>grey2</textcolor>
+        <focusedcolor>white</focusedcolor>
+        <texturenofocus border="5">button-nofocus.png</texturenofocus>
+        <texturefocus border="5">button-focus2.png</texturefocus>
+        <label>Start recording</label>
+        <onright>12</onright>
+        <onleft>12</onleft>
+        <onup>10</onup>
+        <ondown>13</ondown>
+      </control>
+      <control type="radiobutton" id="113">
+        <description>force pre-padding</description>
+        <posx>440</posx>
+        <posy>0</posy>
+        <height>40</height>
+        <width>120</width>
+        <label>Require</label>
+        <font>font13</font>
+        <textcolor>grey2</textcolor>
+        <focusedcolor>white</focusedcolor>
+        <texturenofocus border="5">button-nofocus.png</texturenofocus>
+        <texturefocus border="5">button-focus2.png</texturefocus>
+        <onright>10</onright>
+        <onleft>10</onleft>
+        <onup>1</onup>
+        <ondown>11</ondown>
+      </control>
+      <control type="spincontrolex" id="114">
+        <description>post-padding amount</description>
+        <posx>0</posx>
+        <posy>45</posy>
+        <width>420</width>
+        <height>40</height>
+        <font>font13</font>
+        <textcolor>grey2</textcolor>
+        <focusedcolor>white</focusedcolor>
+        <texturenofocus border="5">button-nofocus.png</texturenofocus>
+        <texturefocus border="5">button-focus2.png</texturefocus>
+        <label>Stop recording</label>
+        <onright>12</onright>
+        <onleft>12</onleft>
+        <onup>10</onup>
+        <ondown>13</ondown>
+      </control>
+      <control type="radiobutton" id="115">
+        <description>force post-padding</description>
+        <posx>440</posx>
+        <posy>45</posy>
+        <height>40</height>
+        <width>120</width>
+        <label>Require</label>
+        <font>font13</font>
+        <textcolor>grey2</textcolor>
+        <focusedcolor>white</focusedcolor>
+        <texturenofocus border="5">button-nofocus.png</texturenofocus>
+        <texturefocus border="5">button-focus2.png</texturefocus>
+        <onright>10</onright>
+        <onleft>10</onleft>
+        <onup>1</onup>
+        <ondown>11</ondown>
+      </control>
+      <control type="spincontrolex" id="116">
+        <description>keep length</description>
+        <posx>0</posx>
+        <posy>90</posy>
+        <width>420</width>
+        <height>40</height>
+        <font>font13</font>
+        <textcolor>grey2</textcolor>
+        <focusedcolor>white</focusedcolor>
+        <texturenofocus border="5">button-nofocus.png</texturenofocus>
+        <texturefocus border="5">button-focus2.png</texturefocus>
+        <label>Keep until</label>
+        <onright>12</onright>
+        <onleft>12</onleft>
+        <onup>10</onup>
+        <ondown>13</ondown>
+      </control>
+    </control>
+
+    <control type="group" descripton="series settings">
+      <posx>80</posx>
+      <posy>365</posy>
+      <width>420</width>
+      <height>150</height>
+      <control type="spincontrolex" id="12">
+        <description>series runtype</description>
+        <posx>0</posx>
+        <posy>0</posy>
+        <width>420</width>
+        <height>40</height>
+        <font>font13</font>
+        <textcolor>grey2</textcolor>
+        <focusedcolor>white</focusedcolor>
+        <texturenofocus border="5">button-nofocus.png</texturenofocus>
+        <texturefocus border="5">button-focus2.png</texturefocus>
+        <label>$ADDON[pvr.wmc 30103]</label>
+        <onright>12</onright>
+        <onleft>12</onleft>
+        <onup>10</onup>
+        <ondown>13</ondown>
+      </control>
+
+      <control type="spincontrolex" id="13">
+        <description>channel series choice</description>
+        <posx>0</posx>
+        <posy>45</posy>
+        <width>420</width>
+        <height>40</height>
+        <font>font13</font>
+        <textcolor>grey2</textcolor>
+        <focusedcolor>white</focusedcolor>
+        <texturenofocus border="5">button-nofocus.png</texturenofocus>
+        <texturefocus border="5">button-focus2.png</texturefocus>
+        <label>$ADDON[pvr.wmc 30107]</label>
+        <onright>13</onright>
+        <onleft>13</onleft>
+        <onup>12</onup>
+        <ondown>14</ondown>
+      </control>
+
+      <control type="spincontrolex" id="14">
+        <description>airtime series choice</description>
+        <posx>0</posx>
+        <posy>90</posy>
+        <width>420</width>
+        <height>40</height>
+        <font>font13</font>
+        <textcolor>grey2</textcolor>
+        <focusedcolor>white</focusedcolor>
+        <texturenofocus border="5">button-nofocus.png</texturenofocus>
+        <texturefocus border="5">button-focus2.png</texturefocus>
+        <label>$ADDON[pvr.wmc 30110]</label>
+        <onright>14</onright>
+        <onleft>14</onleft>
+        <onup>13</onup>
+        <ondown>1</ondown>
+      </control>
+
+      <control type="group" descripton="days of week">
+        <posx>0</posx>
+        <posy>135</posy>
+        <width>500</width>
+        <height>40</height>
+        <control type="radiobutton" id="170">
+          <description>episode recording</description>
+          <posx>0</posx>
+          <posy>0</posy>
+          <height>40</height>
+          <width>80</width>
+          <label>Mon</label>
+          <font>font13</font>
+          <textcolor>grey2</textcolor>
+          <focusedcolor>white</focusedcolor>
+          <texturenofocus border="5">button-nofocus.png</texturenofocus>
+          <texturefocus border="5">button-focus2.png</texturefocus>
+          <onright>10</onright>
+          <onleft>10</onleft>
+          <onup>1</onup>
+          <ondown>11</ondown>
+        </control>
+        <control type="radiobutton" id="171">
+          <description>episode recording</description>
+          <posx>85</posx>
+          <posy>0</posy>
+          <height>40</height>
+          <width>80</width>
+          <label>Tue</label>
+          <font>font13</font>
+          <textcolor>grey2</textcolor>
+          <focusedcolor>white</focusedcolor>
+          <texturenofocus border="5">button-nofocus.png</texturenofocus>
+          <texturefocus border="5">button-focus2.png</texturefocus>
+          <onright>10</onright>
+          <onleft>10</onleft>
+          <onup>1</onup>
+          <ondown>11</ondown>
+        </control>
+        <control type="radiobutton" id="172">
+          <description>episode recording</description>
+          <posx>170</posx>
+          <posy>0</posy>
+          <height>40</height>
+          <width>80</width>
+          <label>Wed</label>
+          <font>font13</font>
+          <textcolor>grey2</textcolor>
+          <focusedcolor>white</focusedcolor>
+          <texturenofocus border="5">button-nofocus.png</texturenofocus>
+          <texturefocus border="5">button-focus2.png</texturefocus>
+          <onright>10</onright>
+          <onleft>10</onleft>
+          <onup>1</onup>
+          <ondown>11</ondown>
+        </control>
+        <control type="radiobutton" id="173">
+          <description>episode recording</description>
+          <posx>255</posx>
+          <posy>0</posy>
+          <height>40</height>
+          <width>80</width>
+          <label>Thu</label>
+          <font>font13</font>
+          <textcolor>grey2</textcolor>
+          <focusedcolor>white</focusedcolor>
+          <texturenofocus border="5">button-nofocus.png</texturenofocus>
+          <texturefocus border="5">button-focus2.png</texturefocus>
+          <onright>10</onright>
+          <onleft>10</onleft>
+          <onup>1</onup>
+          <ondown>11</ondown>
+        </control>
+        <control type="radiobutton" id="174">
+          <description>episode recording</description>
+          <posx>340</posx>
+          <posy>0</posy>
+          <height>40</height>
+          <width>80</width>
+          <label>Fri</label>
+          <font>font13</font>
+          <textcolor>grey2</textcolor>
+          <focusedcolor>white</focusedcolor>
+          <texturenofocus border="5">button-nofocus.png</texturenofocus>
+          <texturefocus border="5">button-focus2.png</texturefocus>
+          <onright>10</onright>
+          <onleft>10</onleft>
+          <onup>1</onup>
+          <ondown>11</ondown>
+        </control>
+        <control type="radiobutton" id="175">
+          <description>episode recording</description>
+          <posx>0</posx>
+          <posy>45</posy>
+          <height>40</height>
+          <width>80</width>
+          <label>Sat</label>
+          <font>font13</font>
+          <textcolor>grey2</textcolor>
+          <focusedcolor>white</focusedcolor>
+          <texturenofocus border="5">button-nofocus.png</texturenofocus>
+          <texturefocus border="5">button-focus2.png</texturefocus>
+          <onright>10</onright>
+          <onleft>10</onleft>
+          <onup>1</onup>
+          <ondown>11</ondown>
+        </control>
+        <control type="radiobutton" id="176">
+          <description>episode recording</description>
+          <posx>85</posx>
+          <posy>45</posy>
+          <height>40</height>
+          <width>80</width>
+          <label>Sun</label>
+          <font>font13</font>
+          <textcolor>grey2</textcolor>
+          <focusedcolor>white</focusedcolor>
+          <texturenofocus border="5">button-nofocus.png</texturenofocus>
+          <texturefocus border="5">button-focus2.png</texturefocus>
+          <onright>10</onright>
+          <onleft>10</onleft>
+          <onup>1</onup>
+          <ondown>11</ondown>
+        </control>
+        <control type="radiobutton" id="177">
+          <description>episode recording</description>
+          <posx>170</posx>
+          <posy>45</posy>
+          <height>40</height>
+          <width>80</width>
+          <label>Any</label>
+          <font>font13</font>
+          <textcolor>grey2</textcolor>
+          <focusedcolor>white</focusedcolor>
+          <texturenofocus border="5">button-nofocus.png</texturenofocus>
+          <texturefocus border="5">button-focus2.png</texturefocus>
+          <onright>10</onright>
+          <onleft>10</onleft>
+          <onup>1</onup>
+          <ondown>11</ondown>
+        </control>
+        
+      </control>
+    </control>
+
+    <control type="group" id="9001" descripton="Ok-Cancel buttons">
+      <posx>500</posx>
+      <posy>122.5</posy>
+      <control type="button" id="1">
+        <description>Ok Button</description>
+        <posx>0</posx>
+        <posy>0</posy>
+        <width>100</width>
+        <height>40</height>
+        <align>center</align>
+        <aligny>center</aligny>
+        <texturenofocus border="5">button-nofocus.png</texturenofocus>
+        <texturefocus border="5">button-focus.png</texturefocus>
+        <label>186</label>
+        <font>font12_title</font>
+        <onup>14</onup>
+        <onleft>2</onleft>
+        <onright>2</onright>
+        <ondown>10</ondown>
+      </control>
+      <control type="button" id="2">
+        <description>Cancel Button</description>
+        <posx>125</posx>
+        <posy>0</posy>
+        <width>100</width>
+        <height>40</height>
+        <align>center</align>
+        <aligny>center</aligny>
+        <texturenofocus border="5">button-nofocus.png</texturenofocus>
+        <texturefocus border="5">button-focus.png</texturefocus>
+        <label>222</label>
+        <font>font12_title</font>
+        <onup>14</onup>
+        <onleft>1</onleft>
+        <onright>1</onright>
+        <ondown>10</ondown>
+      </control>
+    </control>
+
+  </controls>
+</window>

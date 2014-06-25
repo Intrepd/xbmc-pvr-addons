@@ -74,6 +74,7 @@ bool CDialogRecordPref::OnInit()
 
 	// init runtype spin control
 	_spinRunType = GUI->Control_getSpin(_window, SPIN_CONTROLRunType);
+	_spinRunType->SetText(XBMC->GetLocalizedString(30103));		// set spinner text (show type)
 	_spinRunType->AddLabel(XBMC->GetLocalizedString(30104), 0); // any show type
 	_spinRunType->AddLabel(XBMC->GetLocalizedString(30105), 1);	// first run only
 	_spinRunType->AddLabel(XBMC->GetLocalizedString(30106), 2);	// live only
@@ -81,14 +82,16 @@ bool CDialogRecordPref::OnInit()
 
 	// init channel spin control
 	_spinChannel = GUI->Control_getSpin(_window, SPIN_CONTROL_CHANNEL);
-	_spinChannel->AddLabel(_currentChannel.c_str(), 0);						// add current channel
-	_spinChannel->AddLabel(XBMC->GetLocalizedString(30108), 1);				// add "Any channel"
+	_spinChannel->SetText(XBMC->GetLocalizedString(30107));		// set spinner text (channel)
+	_spinChannel->AddLabel(_currentChannel.c_str(), 0);			// add current channel
+	_spinChannel->AddLabel(XBMC->GetLocalizedString(30108), 1);	// add "Any channel"
 	_spinChannel->SetValue(AnyChannel ? 1:0);
 	
 	// init airtime spin control
 	_spinAirTime = GUI->Control_getSpin(_window, SPIN_CONTROL_AIRTIME);
-	_spinAirTime->AddLabel(_currentAirTime.c_str(), 0);						// current air time
-	_spinAirTime->AddLabel(XBMC->GetLocalizedString(30111), 1);				// "Anytime" 
+	_spinAirTime->SetText(XBMC->GetLocalizedString(30110));		// set spinner text (airtime)
+	_spinAirTime->AddLabel(_currentAirTime.c_str(), 0);			// current air time
+	_spinAirTime->AddLabel(XBMC->GetLocalizedString(30111), 1);	// "Anytime" 
 	_spinAirTime->SetValue(AnyTime ? 1:0);
 	
 	// set visibility of spin controls based on whether dialog is set to rec a series
