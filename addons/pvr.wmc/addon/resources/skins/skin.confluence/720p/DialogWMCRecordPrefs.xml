@@ -214,7 +214,7 @@
       </control>
     </control>
 
-    <control type="group" descripton="series settings">
+    <control type="group" descripton="series settings" id="17">
       <posx>80</posx>
       <posy>365</posy>
       <width>420</width>

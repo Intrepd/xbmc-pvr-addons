@@ -23,6 +23,7 @@
 #include "pvr2wmc.h"
 #include "utilities.h"
 #include "DialogRecordPref.h"
+#include "DialogRecordPref2.h"
 #include "DialogDeleteTimer.h"
 #include "platform/util/timeutils.h"
 
@@ -436,6 +437,7 @@ PVR_ERROR Pvr2Wmc::AddTimer(const PVR_TIMER &xTmr)
 	int runType;								// the type of episodes to record (all, new, live)
 	bool anyChannel;							// whether to rec series from ANY channel
 	bool anyTime;								// whether to rec series at ANY time
+	bool useObsoleteDlog = false;
 
 	CStdString command;
 	CStdString timerStr = Timer2String(xTmr);	// convert timer to string
@@ -443,8 +445,8 @@ PVR_ERROR Pvr2Wmc::AddTimer(const PVR_TIMER &xTmr)
 	if (xTmr.startTime != 0 && xTmr.iEpgUid != -1)		// if we are NOT doing an 'instant' record (=0) AND not a 'manual' record (=-1)
 	{
 
-		command = "GetShowInfo" + timerStr;		// request data about the show that will be recorded by the timer
-		vector<CStdString> info;				// holds results from server
+		command = "GetShowInfo" + timerStr;				// request data about the show that will be recorded by the timer
+		vector<CStdString> info;						// holds results from server
 		info = _socketClient.GetVector(command, true);	// get results from server
 
 		if (isServerError(info))
@@ -453,18 +455,54 @@ PVR_ERROR Pvr2Wmc::AddTimer(const PVR_TIMER &xTmr)
 		} 
 		else 
 		{
-			isSeries = info[0] == "True";			// first string determines if show is a series (all that is handled for now)
-			if (isSeries)							// if the show is a series, next string contains record params for series
+			isSeries = info[0] == "True";				// first string determines if show is a series
+
+			// get the rest of the show info results is a string that contains default values for series programs
+			vector<CStdString> v = split(info[1].c_str(), "|");		
+
+			if (v.size() < 7)
 			{
-				vector<CStdString> v = split(info[1].c_str(), "|");		// split to unpack string containing series params
+				XBMC->Log(LOG_DEBUG, "Wrong number of fields xfered for AddTimer data");
+				return PVR_ERROR_SERVER_ERROR;
+			}
 
-				if (v.size() < 7)
+			if (info.size() > 2)					// if we got a ProgramType (third) parameter attempt to use new style rec prefs dialog
+			{
+				std::string pType = info[2];		// get program type
+
+				vector<CStdString> def = _socketClient.GetVector("GetNewTimerDefaults|" + pType, true);
+				
+				// get starting (default) values from GetNewTimerDefaults
+				anyChannel = def[4] == "True";
+				runType = atoi(def[5].c_str());							// any=0, firstRun=1, live=2
+				anyTime = def[7] == "True";
+				
+				CDialogRecordPref2 vWindow2(	recSeries, runType, anyChannel, anyTime,
+					v[4]/*channelName*/, v[5]/*=startTimeStr*/, v[6]/*showName*/  // these values were received from GetShowInfo
+				);
+				
+				int dlogResult = vWindow2.DoModal();
+
+				if (dlogResult == 1)
 				{
-					XBMC->Log(LOG_DEBUG, "Wrong number of fields xfered for AddTimer data");
-					return PVR_ERROR_NO_ERROR;
 				}
+				else if (dlogResult == 0)
+					return PVR_ERROR_NO_ERROR;		// user canceled timer in dialog
+				else
+				{
+					// failed to open a new style dialog probably due to skin support
+					XBMC->Log(LOG_DEBUG, "new style recording pref dialog could not be created - probably due to no skin support");
+					useObsoleteDlog = true;			
+				}
+			}
+			else
+				useObsoleteDlog = true;				// try the old dialog (swmc didn't give back enough params for new dialog)
+			
 
-				// fill in params for dialog windows
+			if (isSeries && useObsoleteDlog)				// if the show is a series and new dialog type failed
+			{
+
+				// fill in params for dialog window from data recieved in GetShowInfo
 				recSeries = v[0] == "True";								// get reset of params for dialog windows
 				runType = atoi(v[1].c_str());							// any=0, firstRun=1, live=2
 				anyChannel = v[2] == "True";
@@ -486,8 +524,9 @@ PVR_ERROR Pvr2Wmc::AddTimer(const PVR_TIMER &xTmr)
 				}
 				else if (dlogResult == 0)
 					return PVR_ERROR_NO_ERROR;						// user canceled timer in dialog
-				else
+				else if (dlogResult == -1)							// if dlog result is -1 the dialog was not created
 				{
+					XBMC->Log(LOG_DEBUG, "old style recording pref dialog could not be created - probably due to no skin support");
 				}
 			}
 		}

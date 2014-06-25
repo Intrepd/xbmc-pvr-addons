@@ -104,3 +104,19 @@ private:
 	bool _insertDurationHeader;			// if true, insert a duration header for active Rec TS file
 	CStdString _durationHeader;			// the header to insert (received from server)
 };
+
+// enum defines the program type returned by GetShowInfo.  It matches ServerWMC's 'ProgramType' enum
+  typedef enum PROGRAMTYPE
+  {
+        none = 0,
+        IsRepeat = 1,
+        IsSeries = 2,
+        IsHD = 4,
+        IsMovie = 8,
+        IsSports = 16,
+        IsKids = 32,
+        IsLive = 64,
+        IsNews = 128,
+        IsPremiere = 256
+    } ;
+	
