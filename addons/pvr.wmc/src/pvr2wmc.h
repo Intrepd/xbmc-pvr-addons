@@ -21,7 +21,6 @@
 */
 
 #include <vector>
-#include "platform/util/StdString.h"
 #include "client.h"
 #include "Socket.h"
 

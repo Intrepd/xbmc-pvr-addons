@@ -23,6 +23,7 @@
 
 #include "client.h"
 #include "pvr2wmc.h"
+#include "platform/util/StdString.h"
 
 // version 2 of custom recording pref dialog
 
@@ -30,33 +31,54 @@ class CDialogRecordPref2
 {
 
 public:
-  CDialogRecordPref2(bool recSeries, int runtype, bool anyChannel, bool anyTime,
-					std::string currentChannelName, std::string currentAirTime, std::string showName);
+  CDialogRecordPref2(bool isSeries, bool recSeries, int runtype, bool anyChannel, bool anyTime,
+					int days, int recDay, CStdString keepLength,
+					vector<CStdString> preDefPaddings, int preDefIndex, vector<CStdString> postDefPaddings, int postDefIndex,
+					bool isPrePadForced, bool isPostPadForced,
+					vector<CStdString> keepLengths, int keepLengthIndex, vector<CStdString> maxEpisodesAmounts, int maxEpisodeIndex,
+					CStdString currentChannelName, CStdString currentAirTime, CStdString showName);
 	virtual ~CDialogRecordPref2();
 
 	bool Show();
 	void Close();
 	int DoModal();						// returns -1=> load failed, 0=>canceled, 1=>confirmed
-	//bool LoadFailed();					
+	
 
-  // dialog specific params
+	// value returned to caller
 	bool RecSeries;						// values returned
 	int RunType;
 	bool AnyChannel;
 	bool AnyTime;
-	void DaysOfWeekVisible(bool visable);
+	CStdString KeepLimit;
+	int GetDaysOfWeek();
+	int GetPrePaddingIndex();
+	int GetPostPaddingIndex();
 
 private:
-	std::string _currentChannel;		// these are just used for dialog display
-	std::string _currentAirTime;
-	std::string _showName;
+	CStdString _currentChannel;			// these are just used for dialog display
+	CStdString _currentAirTime;
+	CStdString _showName;
+private:
+	void DaysOfWeekVisible(bool visable);
+	void DaysOfWeekSetSelected(bool val);
+	void SetDaysOfWeek(int days);
+	void SetDefaults();
 	
 private:
 	CAddonGUIRadioButton *_radioRecEpisode;
 	CAddonGUIRadioButton *_radioRecSeries;
+	CAddonGUIRadioButton *_radioAnyDay;
+	CAddonGUIRadioButton *_radioRecDay;
+	CAddonGUIRadioButton *_radioForcePrePad;
+	CAddonGUIRadioButton *_radioForcePostPad;
 	CAddonGUISpinControl *_spinRunType;
 	CAddonGUISpinControl *_spinChannel;
 	CAddonGUISpinControl *_spinAirTime;
+	CAddonGUISpinControl *_spinPrePadding;
+	CAddonGUISpinControl *_spinPostPadding;
+	CAddonGUISpinControl *_spinKeepLength;
+	CAddonGUISpinControl *_spinMaxEpisode;
+
 
   // following is needed for every dialog
 private:

@@ -24,29 +24,81 @@
 
 #define BUTTON_OK                       1
 #define BUTTON_CANCEL                   2
-#define BUTTON_CLOSE                   22
+#define BUTTON_CLOSE					22
+#define BUTTON_DEFAULTS					180
 
 #define RADIO_BUTTON_EPISODE			10
 #define RADIO_BUTTON_SERIES				11
+#define RADIO_FORCE_PREPAD				113
+#define RADIO_FORCE_POSTPAD				115
+
 #define SPIN_CONTROLRunType				12
 #define SPIN_CONTROL_CHANNEL			13
 #define SPIN_CONTROL_AIRTIME			14
+#define SPIN_CONTROL_MAXEPISODE			15
+#define SPIN_CONTROL_PREPAD				112
+#define SPIN_CONTROL_POSTPAD			114
+#define SPIN_CONTROL_KEEPLENGTH			116
+
 #define LABEL_SHOWNAME					20
 
 #define DAYS_CONTROLS_START				170
-#define DAYS_CONTROLS_END				178
+#define DAYS_CONTROLS_ANY				177
+
+// used to save default values
+bool _defRecSeries;
+int _defRunType;
+bool _defAnyChannel;
+bool _defAnyTime;
+CStdString _defKeepLimit;
 
 
-CDialogRecordPref2::CDialogRecordPref2(	bool recSeries, int runtype, bool anyChannel, bool anyTime,
-										std::string currentChannelName, std::string currentAirTime, std::string showName) 
+int _days;
+int _recDay;		// hold the index of day of week the series records on Note its a DateTime day of week (starts at 0=>Sunday)
+bool _isSeries;
+int _preDefIndex, _postDefIndex;
+int _keepLengthIndex, _maxEpisodeIndex;
+vector<CStdString> _preDefPaddings;
+vector<CStdString> _postDefPaddings;
+vector<CStdString> _keepLengths;
+vector<CStdString> _maxEpisodes;
+bool _isPrePadForced, _isPostPadForced;
+
+
+CDialogRecordPref2::CDialogRecordPref2(
+					bool isSeries, bool recSeries, int runtype, bool anyChannel, bool anyTime,
+					int days, int recDay, CStdString keepLimit,
+					vector<CStdString> preDefPaddings, int preDefIndex, vector<CStdString> postDefPaddings, int postDefIndex,
+					bool isPrePadForced, bool isPostPadForced,
+					vector<CStdString> keepLengths, int keepLengthIndex, vector<CStdString> maxEpisodesAmounts, int maxEpisodeIndex,
+					CStdString currentChannelName, CStdString currentAirTime, CStdString showName) 
 {
-	RecSeries = recSeries;
-	RunType = runtype;
-	AnyChannel = anyChannel;
-	AnyTime = anyTime;
+	// set result fields and save defaults
+	_isSeries = isSeries;
+	if (!_isSeries)
+		RecSeries = _defRecSeries = false;			// show is not a series, recSeries is never true
+	else
+		RecSeries = _defRecSeries = recSeries;		// set whether rec series or episode is set by default, is default settings
+	RunType = _defRunType = runtype;
+	AnyChannel = _defAnyChannel = anyChannel;
+	AnyTime = _defAnyTime = anyTime;
+	KeepLimit = _defKeepLimit = keepLimit;
+	// these fields are not accessible
 	_currentChannel = currentChannelName;
 	_currentAirTime = currentAirTime;
 	_showName = showName;
+	_days = days;
+	_recDay = recDay;
+	_preDefPaddings = preDefPaddings;
+	_postDefPaddings = postDefPaddings;
+	_preDefIndex = preDefIndex;
+	_postDefIndex = postDefIndex;
+	_isPrePadForced = isPrePadForced;
+	_isPostPadForced = isPostPadForced;
+	_keepLengthIndex = keepLengthIndex;
+	_maxEpisodeIndex = maxEpisodeIndex;
+	_keepLengths = keepLengths;
+	_maxEpisodes = maxEpisodesAmounts;
 
 	// needed for every dialog
 	_confirmed = -1;				// init to failed load value (due to xml file not being found)
@@ -68,13 +120,98 @@ bool CDialogRecordPref2::OnInit()
 	// display the show name in the window
 	_window->SetControlLabel(LABEL_SHOWNAME, _showName.c_str());
 
+	CStdString str; 
+
 	// init radio buttons
 	_radioRecEpisode = GUI->Control_getRadioButton(_window, RADIO_BUTTON_EPISODE);
 	_radioRecSeries = GUI->Control_getRadioButton(_window, RADIO_BUTTON_SERIES);
-	_radioRecEpisode->SetText(XBMC->GetLocalizedString(30101));
-	_radioRecSeries->SetText(XBMC->GetLocalizedString(30102));
-	_radioRecEpisode->SetSelected(!RecSeries);
+	_radioRecEpisode->SetText("Record Episode"/*XBMC->GetLocalizedString(30101)*/);
+	_radioRecSeries->SetText("Record Series"/*XBMC->GetLocalizedString(30102)*/);
+	_radioRecEpisode->SetSelected(!RecSeries || !_isSeries);
+	if (!_isSeries)
+		_radioRecSeries->SetVisible(false);
 	_radioRecSeries->SetSelected(RecSeries);  
+
+	// force pre/post pad radio buttons
+	_radioForcePrePad = GUI->Control_getRadioButton(_window, RADIO_FORCE_PREPAD);
+	_radioForcePrePad->SetSelected(_isPrePadForced);
+	_radioForcePostPad = GUI->Control_getRadioButton(_window, RADIO_FORCE_POSTPAD);
+	_radioForcePostPad->SetSelected(_isPostPadForced);
+
+	// init pre-padding spinner
+	_spinPrePadding = GUI->Control_getSpin(_window, SPIN_CONTROL_PREPAD);
+	_spinPrePadding->SetText(XBMC->GetLocalizedString(30123));		// set spinner text 
+	for (int i=0; i<_preDefPaddings.size(); i++)
+	{
+		int minutes = atoi(_preDefPaddings[i]);
+		if (minutes / 60 > 0 && minutes % 60 == 0)
+		{
+			if (minutes / 60 == 1)
+				str.Format(XBMC->GetLocalizedString(30126), minutes / 60);
+			else
+				str.Format(XBMC->GetLocalizedString(30127), minutes / 60);
+		}
+		else
+		{
+			if (minutes == 1)
+				str.Format(XBMC->GetLocalizedString(30124), minutes);
+			else
+				str.Format(XBMC->GetLocalizedString(30125), minutes);
+		}
+		_spinPrePadding->AddLabel(str, i);			// set spinner label
+	}
+	_spinPrePadding->SetValue(_preDefIndex);		// set spinner default
+	
+	// init post-padding spinner
+	_spinPostPadding = GUI->Control_getSpin(_window, SPIN_CONTROL_POSTPAD);
+	_spinPostPadding->SetText(XBMC->GetLocalizedString(30128));		// set spinner text 
+	for (int i=0; i<_postDefPaddings.size(); i++)
+	{
+		int minutes = atoi(_postDefPaddings[i]);
+		if (minutes / 60 > 0 && minutes % 60 == 0)
+		{
+			if (minutes / 60 == 1)  
+				str.Format(XBMC->GetLocalizedString(30131), minutes / 60);
+			else
+				str.Format(XBMC->GetLocalizedString(30132), minutes / 60);
+		}
+		else
+		{
+			if (minutes == 1)
+				str.Format(XBMC->GetLocalizedString(30129), minutes);
+			else
+				str.Format(XBMC->GetLocalizedString(30130), minutes);
+		}
+		_spinPostPadding->AddLabel(str, i);			// set spinner label 
+	}
+	_spinPostPadding->SetValue(_postDefIndex);		// set spinner default 
+
+	// keep length spinner
+	_spinKeepLength = GUI->Control_getSpin(_window, SPIN_CONTROL_KEEPLENGTH);
+	_spinKeepLength->SetText(XBMC->GetLocalizedString(30133));		// set spinner text 
+	for (int i=0; i<_keepLengths.size(); i++)
+	{
+		_spinKeepLength->AddLabel(XBMC->GetLocalizedString(30134 + i),  i);			// set spinner labels
+	}
+	_spinKeepLength->SetValue(_keepLengthIndex);		// set spinner default 
+
+	
+	// max episode spinner
+	_spinMaxEpisode = GUI->Control_getSpin(_window, SPIN_CONTROL_MAXEPISODE);
+	_spinMaxEpisode->SetText(XBMC->GetLocalizedString(30138));				// set spinner text 
+	for (int i=0; i<_maxEpisodes.size(); i++)
+	{
+		if (_maxEpisodes[i] == "1")
+			str.Format(XBMC->GetLocalizedString(30139), _maxEpisodes[i]);
+		else if (_maxEpisodes[i] == "-1")
+			str = XBMC->GetLocalizedString(30141);
+		else 
+			str.Format(XBMC->GetLocalizedString(30140), _maxEpisodes[i]);
+
+		_spinMaxEpisode->AddLabel(str,  i);				// set spinner labels
+	}
+	_spinMaxEpisode->SetValue(_maxEpisodeIndex);		// set spinner default 
+
 
 	// init runtype spin control
 	_spinRunType = GUI->Control_getSpin(_window, SPIN_CONTROLRunType);
@@ -97,14 +234,32 @@ bool CDialogRecordPref2::OnInit()
 	_spinAirTime->AddLabel(_currentAirTime.c_str(), 0);			// current air time
 	_spinAirTime->AddLabel(XBMC->GetLocalizedString(30111), 1);	// "Anytime" 
 	_spinAirTime->SetValue(AnyTime ? 1:0);
+
+	// init days of week radio buttons
+	_radioAnyDay = GUI->Control_getRadioButton(_window, DAYS_CONTROLS_ANY);
+	_radioRecDay = GUI->Control_getRadioButton(_window, DAYS_CONTROLS_START + _recDay);	// get the control that corresponds to the recording Day
+	SetDaysOfWeek(_days);
 	
 	// set visibility of spin controls based on whether dialog is set to rec a series
 	_spinRunType->SetVisible(RecSeries);
 	_spinChannel->SetVisible(RecSeries);
 	_spinAirTime->SetVisible(RecSeries);
+	_spinMaxEpisode->SetVisible(RecSeries);
 	DaysOfWeekVisible(RecSeries);
 
   return true;
+}
+
+void CDialogRecordPref2::SetDefaults()
+{
+	// set result fields and save defaults
+	//RecSeries = _defRecSeries;  don't restore whether to rec series, leave it at last value
+	RunType = _defRunType;
+	AnyChannel = _defAnyChannel;
+	AnyTime = _defAnyTime;
+
+	//restore controls with default values
+	OnInit();
 }
 
 bool CDialogRecordPref2::OnClick(int controlId)
@@ -121,40 +276,132 @@ bool CDialogRecordPref2::OnClick(int controlId)
 			if (_confirmed == -1)		// if not previously confirmed, set to cancel value
 				_confirmed = 0;			
 			_window->Close();
-			GUI->Control_releaseRadioButton(_radioRecEpisode);
+			GUI->Control_releaseRadioButton(_radioRecEpisode);  // not sure if these releases are needed
 			GUI->Control_releaseRadioButton(_radioRecSeries);
 			GUI->Control_releaseSpin(_spinRunType);
 			GUI->Control_releaseSpin(_spinChannel);
 			GUI->Control_releaseSpin(_spinAirTime);
 			break;
+		case BUTTON_DEFAULTS:
+			SetDefaults();
+			break;
 		case RADIO_BUTTON_EPISODE:
-			RecSeries = !_radioRecEpisode->IsSelected();
+		case RADIO_BUTTON_SERIES:
+			RecSeries = (controlId == RADIO_BUTTON_SERIES);
+			_radioRecEpisode->SetSelected(!RecSeries);
 			_radioRecSeries->SetSelected(RecSeries);
 			_spinRunType->SetVisible(RecSeries);
 			_spinChannel->SetVisible(RecSeries);
 			_spinAirTime->SetVisible(RecSeries);
+			_spinMaxEpisode->SetVisible(RecSeries);
 			DaysOfWeekVisible(RecSeries);
 			break;
-		case RADIO_BUTTON_SERIES:
-			RecSeries = _radioRecSeries->IsSelected();
-			_radioRecEpisode->SetSelected(!RecSeries);
-			_spinRunType->SetVisible(RecSeries);
-			_spinChannel->SetVisible(RecSeries);
-			_spinAirTime->SetVisible(RecSeries);
-			DaysOfWeekVisible(RecSeries);
+		case DAYS_CONTROLS_ANY:
+			if (_radioAnyDay->IsSelected())
+				DaysOfWeekSetSelected(true);
+			else
+			{
+				DaysOfWeekSetSelected(false);
+				_radioRecDay->SetSelected(true);
+			}
 			break;
+	}
+	if (controlId >= DAYS_CONTROLS_START && controlId < DAYS_CONTROLS_ANY)							// if a day radio button was clicked
+	{
+		CAddonGUIRadioButton *radio = GUI->Control_getRadioButton(_window, controlId);				// get the button clicked
+
+		if (!radio->IsSelected())					// if the day was deselected
+		{
+			if (_radioAnyDay->IsSelected())			// make 'any' day deselected too
+				_radioAnyDay->SetSelected(false);
+		}
+		else										// a day was selected
+		{
+			// see if all days are now selected, if they are then select 'Any' day too
+			bool allDaysSelected = true;
+			for (int i = DAYS_CONTROLS_START; i<DAYS_CONTROLS_ANY; i++)
+			{
+				CAddonGUIRadioButton *radio = GUI->Control_getRadioButton(_window, i);
+				if (!radio->IsSelected())
+				{
+					allDaysSelected = false;
+					break;
+				}
+			}
+			if (allDaysSelected)					// all days are selected, so set 'Any' day true
+				_radioAnyDay->SetSelected(true);
+		}
+
 	}
 
   return true;
 }
 
+// set days of week selected state based on wmc DaysOfWeek input value.  
+// Uses bit-wise selection
+void CDialogRecordPref2::SetDaysOfWeek(int days)
+{
+	int bit = 1;
+	for (int i=DAYS_CONTROLS_START; i<DAYS_CONTROLS_ANY; i++)
+	{
+		CAddonGUIRadioButton *radio = GUI->Control_getRadioButton(_window, i);
+		radio->SetSelected( (bit & days) != 0);		// set radio button as selected depending on bit value
+		bit = bit<<1;								// shift day bit to left
+	}
+	if (days == 0x7f)
+		_radioAnyDay->SetSelected(true); 
+}
+
+//set all days of week (including 'Any') visible or now visible
 void CDialogRecordPref2::DaysOfWeekVisible(bool show)
 {
-	for (int i=DAYS_CONTROLS_START; i<DAYS_CONTROLS_END; i++)
+	for (int i=DAYS_CONTROLS_START; i <= DAYS_CONTROLS_ANY; i++)
 	{
 		CAddonGUIRadioButton *radio = GUI->Control_getRadioButton(_window, i);
 		radio->SetVisible(show);
 	}
+}
+
+// set all days of week selected or not selected (excluding 'Any' day)
+void CDialogRecordPref2::DaysOfWeekSetSelected(bool val)
+{
+	for (int i=DAYS_CONTROLS_START; i<DAYS_CONTROLS_ANY; i++)
+	{
+		CAddonGUIRadioButton *radio = GUI->Control_getRadioButton(_window, i);
+		radio->SetSelected(val);
+	}
+}
+
+// return wmc DaysOfWeek value as set by days radio buttons
+int CDialogRecordPref2::GetDaysOfWeek()
+{
+	if (_radioAnyDay->IsSelected())
+		return 0x7f;
+	else
+	{
+		int retValue = 0;
+		int bit = 1;
+		for (int i=DAYS_CONTROLS_START; i<DAYS_CONTROLS_ANY; i++)
+		{
+			CAddonGUIRadioButton *radio = GUI->Control_getRadioButton(_window, i);
+			if (radio->IsSelected())
+				retValue = retValue | bit;
+			bit = bit<<1;							// shift day bit to left
+		}
+		if (retValue == 0)							// if user for some reason switched off all the day flags
+			retValue = _recDay + 1;					// so force rec day (+1 to convert from DateTime day to wmc DaysOfWeek enum)
+		return retValue;
+	}
+}
+
+int CDialogRecordPref2::GetPrePaddingIndex()
+{
+	return _spinPrePadding->GetValue();
+}
+
+int CDialogRecordPref2::GetPostPaddingIndex()
+{
+	return _spinPostPadding->GetValue();
 }
 
 bool CDialogRecordPref2::OnInitCB(GUIHANDLE cbhdl)

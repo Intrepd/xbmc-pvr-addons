@@ -175,6 +175,9 @@ msgctxt "#30111"
 msgid "Anytime"
 msgstr ""
 
+msgctxt "#30112"
+msgid "Keep only:"
+msgstr ""
 
 msgctxt "#30120"
 msgid "Delete Timer"
@@ -186,4 +189,80 @@ msgstr ""
 
 msgctxt "#30122"
 msgid "Delete the entire series"
+msgstr ""
+
+msgctxt "#30123"
+msgid "Start:"
+msgstr ""
+
+msgctxt "#30124"
+msgid "%d minute before"
+msgstr ""
+
+msgctxt "#30125"
+msgid "%d minutes before"
+msgstr ""
+
+msgctxt "#30126"
+msgid "%d hour before"
+msgstr ""
+
+msgctxt "#30127"
+msgid "%d hours before"
+msgstr ""
+
+msgctxt "#30128"
+msgid "Stop:"
+msgstr ""
+
+msgctxt "#30129"
+msgid "%d minute after"
+msgstr ""
+
+msgctxt "#30130"
+msgid "%d minutes after"
+msgstr ""
+
+msgctxt "#30131"
+msgid "%d hour after"
+msgstr ""
+
+msgctxt "#30132"
+msgid "%d hours after"
+msgstr ""
+
+msgctxt "#30133"
+msgid "Keep until:"
+msgstr ""
+
+msgctxt "#30134"
+msgid "space is needed"
+msgstr ""
+
+msgctxt "#30135"
+msgid "for 1 week"
+msgstr ""
+
+msgctxt "#30136"
+msgid "watched"
+msgstr ""
+
+msgctxt "#30137"
+msgid "until I delete"
+msgstr ""
+
+msgctxt "#30138"
+msgid "Keep:"
+msgstr ""
+
+msgctxt "#30139"
+msgid "%s episode"
+msgstr ""
+
+msgctxt "#30140"
+msgid "%s episodes"
+msgstr ""
+
+msgctxt "#30141"
+msgid "as many as possible"
 msgstr ""

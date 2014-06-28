@@ -3,16 +3,17 @@
   <coordinates>
     <system>1</system>
     <posx>240</posx>
-    <posy>100</posy>
+    <posy>50</posy>
   </coordinates>
   <include>dialogeffect</include>
   <controls>
-    <control type="image">
+    <!-- this control defines windows size -->
+    <control type="image" description="background">
       <description>background image</description>
       <posx>0</posx>
       <posy>0</posy>
       <width>800</width>
-      <height>605</height>
+      <height>600</height>
       <texture border="40">DialogBack.png</texture>
     </control>
     <control type="image">
@@ -23,13 +24,15 @@
       <height>40</height>
       <texture>dialogheader.png</texture>
     </control>
-    <control type="label">
-      <description>header label</description>
+    
+    <!-- window title will hold the name of the show -->
+    <control type="label" id = "20" description="window title">
       <posx>40</posx>
       <posy>20</posy>
       <width>720</width>
       <height>30</height>
       <font>font13_title</font>
+      <textcolor>white</textcolor>
       <label>$ADDON[pvr.wmc 30100]</label>
       <align>center</align>
       <aligny>center</aligny>
@@ -53,32 +56,20 @@
       <ondown>10</ondown>
       <visible>system.getbool(input.enablemouse)</visible>
     </control>
-
-    <control type="label" description="program title" id = "20">
-      <posx>40</posx>
-      <posy>60</posy>
-      <width>720</width>
-      <height>30</height>
-      <font>font13_title</font>
-      <!--<label>filled in by code</label>-->
-      <align>left</align>
-      <aligny>center</aligny>
-      <textcolor>white</textcolor>
-      <!--<shadowcolor>black</shadowcolor>-->
-    </control>
     
     <control type="group" description ="series-episode radio buttons">
       <posx>40</posx>
-      <posy>100</posy>
-      <width>320</width>
+      <posy>65</posy>
+      <width>420</width>
       <height>100</height>
-      <control type="radiobutton" id="10">
-        <description>episode recording</description>
+      
+      <control type="radiobutton" id="10" description="episode">
         <posx>0</posx>
         <posy>0</posy>
         <height>40</height>
-        <width>350</width>
-        <label>$ADDON[pvr.wmc 30101]</label>
+        <width>270</width>
+        <!--<label>$ADDON[pvr.wmc 30101]</label>-->
+        <label>Episode</label>
         <font>font13</font>
         <textcolor>grey2</textcolor>
         <focusedcolor>white</focusedcolor>
@@ -90,13 +81,13 @@
         <ondown>11</ondown>
       </control>
 
-      <control type="radiobutton" id="11">
-        <description>series recording</description>
-        <posx>0</posx>
-        <posy>45</posy>
+      <control type="radiobutton" id="11" description="series">
+        <posx>295</posx>
+        <posy>0</posy>
         <height>40</height>
-        <width>350</width>
-        <label>$ADDON[pvr.wmc 30102]</label>
+        <width>270</width>
+        <!--<label>$ADDON[pvr.wmc 30102]</label>-->
+        <label>Series</label>
         <font>font13</font>
         <textcolor>grey2</textcolor>
         <focusedcolor>white</focusedcolor>
@@ -109,22 +100,22 @@
       </control>
     </control>
 
-    <control type="label" description="detailed settings">
-      <posx>40</posx>
-      <posy>195</posy>
+    <control type="label" description="Settings:">
+      <posx>20</posx>
+      <posy>125</posy>
       <width>720</width>
       <height>30</height>
       <font>font13</font>
-      <label>Detailed Settings:</label>
+      <label>Settings:</label>
       <align>left</align>
       <aligny>center</aligny>
       <textcolor>white</textcolor>
       <!--<shadowcolor>black</shadowcolor>-->
     </control>
     
-    <control type="group" descripton="padding, keepTime">
-      <posx>80</posx>
-      <posy>230</posy>
+    <control type="group" descripton="generic settings">
+      <posx>40</posx>
+      <posy>165</posy>
       <width>420</width>
       <height>150</height>
       <control type="spincontrolex" id="112">
@@ -144,23 +135,6 @@
         <onup>10</onup>
         <ondown>13</ondown>
       </control>
-      <control type="radiobutton" id="113">
-        <description>force pre-padding</description>
-        <posx>440</posx>
-        <posy>0</posy>
-        <height>40</height>
-        <width>120</width>
-        <label>Require</label>
-        <font>font13</font>
-        <textcolor>grey2</textcolor>
-        <focusedcolor>white</focusedcolor>
-        <texturenofocus border="5">button-nofocus.png</texturenofocus>
-        <texturefocus border="5">button-focus2.png</texturefocus>
-        <onright>10</onright>
-        <onleft>10</onleft>
-        <onup>1</onup>
-        <ondown>11</ondown>
-      </control>
       <control type="spincontrolex" id="114">
         <description>post-padding amount</description>
         <posx>0</posx>
@@ -178,13 +152,30 @@
         <onup>10</onup>
         <ondown>13</ondown>
       </control>
+      <control type="radiobutton" id="113">
+        <description>force pre-padding</description>
+        <posx>440</posx>
+        <posy>0</posy>
+        <height>40</height>
+        <width>100</width>
+        <label>Force</label>
+        <font>font13</font>
+        <textcolor>grey2</textcolor>
+        <focusedcolor>white</focusedcolor>
+        <texturenofocus border="5">button-nofocus.png</texturenofocus>
+        <texturefocus border="5">button-focus2.png</texturefocus>
+        <onright>10</onright>
+        <onleft>10</onleft>
+        <onup>1</onup>
+        <ondown>11</ondown>
+      </control>
       <control type="radiobutton" id="115">
         <description>force post-padding</description>
         <posx>440</posx>
         <posy>45</posy>
         <height>40</height>
-        <width>120</width>
-        <label>Require</label>
+        <width>100</width>
+        <label>Force</label>
         <font>font13</font>
         <textcolor>grey2</textcolor>
         <focusedcolor>white</focusedcolor>
@@ -215,8 +206,8 @@
     </control>
 
     <control type="group" descripton="series settings" id="17">
-      <posx>80</posx>
-      <posy>365</posy>
+      <posx>40</posx>
+      <posy>300</posy>
       <width>420</width>
       <height>150</height>
       <control type="spincontrolex" id="12">
@@ -238,7 +229,7 @@
       </control>
 
       <control type="spincontrolex" id="13">
-        <description>channel series choice</description>
+        <description>channel choice</description>
         <posx>0</posx>
         <posy>45</posy>
         <width>420</width>
@@ -273,35 +264,35 @@
         <ondown>1</ondown>
       </control>
 
-      <control type="group" descripton="days of week">
+
+      <control type="spincontrolex" id="15" description="recording limit">
         <posx>0</posx>
         <posy>135</posy>
+        <width>420</width>
+        <height>40</height>
+        <font>font13</font>
+        <textcolor>grey2</textcolor>
+        <focusedcolor>white</focusedcolor>
+        <texturenofocus border="5">button-nofocus.png</texturenofocus>
+        <texturefocus border="5">button-focus2.png</texturefocus>
+        <label>Keep only:</label>
+        <onright>14</onright>
+        <onleft>14</onleft>
+        <onup>13</onup>
+        <ondown>1</ondown>
+      </control>
+
+      <control type="group" descripton="days of week">
+        <posx>0</posx>
+        <posy>180</posy>
         <width>500</width>
         <height>40</height>
-        <control type="radiobutton" id="170">
-          <description>episode recording</description>
-          <posx>0</posx>
-          <posy>0</posy>
-          <height>40</height>
-          <width>80</width>
-          <label>Mon</label>
-          <font>font13</font>
-          <textcolor>grey2</textcolor>
-          <focusedcolor>white</focusedcolor>
-          <texturenofocus border="5">button-nofocus.png</texturenofocus>
-          <texturefocus border="5">button-focus2.png</texturefocus>
-          <onright>10</onright>
-          <onleft>10</onleft>
-          <onup>1</onup>
-          <ondown>11</ondown>
-        </control>
         <control type="radiobutton" id="171">
-          <description>episode recording</description>
-          <posx>85</posx>
-          <posy>0</posy>
+          <label>Mon</label>
+          <posx>0</posx>
+          <posy>45</posy>
           <height>40</height>
           <width>80</width>
-          <label>Tue</label>
           <font>font13</font>
           <textcolor>grey2</textcolor>
           <focusedcolor>white</focusedcolor>
@@ -313,12 +304,11 @@
           <ondown>11</ondown>
         </control>
         <control type="radiobutton" id="172">
-          <description>episode recording</description>
-          <posx>170</posx>
-          <posy>0</posy>
+          <label>Tue</label>
+          <posx>85</posx>
+          <posy>45</posy>
           <height>40</height>
           <width>80</width>
-          <label>Wed</label>
           <font>font13</font>
           <textcolor>grey2</textcolor>
           <focusedcolor>white</focusedcolor>
@@ -330,12 +320,11 @@
           <ondown>11</ondown>
         </control>
         <control type="radiobutton" id="173">
-          <description>episode recording</description>
-          <posx>255</posx>
-          <posy>0</posy>
+          <label>Wed</label>
+          <posx>170</posx>
+          <posy>45</posy>
           <height>40</height>
           <width>80</width>
-          <label>Thu</label>
           <font>font13</font>
           <textcolor>grey2</textcolor>
           <focusedcolor>white</focusedcolor>
@@ -347,12 +336,11 @@
           <ondown>11</ondown>
         </control>
         <control type="radiobutton" id="174">
-          <description>episode recording</description>
-          <posx>340</posx>
-          <posy>0</posy>
+          <label>Thu</label>
+          <posx>255</posx>
+          <posy>45</posy>
           <height>40</height>
           <width>80</width>
-          <label>Fri</label>
           <font>font13</font>
           <textcolor>grey2</textcolor>
           <focusedcolor>white</focusedcolor>
@@ -364,12 +352,11 @@
           <ondown>11</ondown>
         </control>
         <control type="radiobutton" id="175">
-          <description>episode recording</description>
-          <posx>0</posx>
+          <label>Fri</label>
+          <posx>340</posx>
           <posy>45</posy>
           <height>40</height>
           <width>80</width>
-          <label>Sat</label>
           <font>font13</font>
           <textcolor>grey2</textcolor>
           <focusedcolor>white</focusedcolor>
@@ -381,12 +368,27 @@
           <ondown>11</ondown>
         </control>
         <control type="radiobutton" id="176">
-          <description>episode recording</description>
-          <posx>85</posx>
-          <posy>45</posy>
+          <label>Sat</label>
+          <posx>0</posx>
+          <posy>0</posy>
           <height>40</height>
           <width>80</width>
+          <font>font13</font>
+          <textcolor>grey2</textcolor>
+          <focusedcolor>white</focusedcolor>
+          <texturenofocus border="5">button-nofocus.png</texturenofocus>
+          <texturefocus border="5">button-focus2.png</texturefocus>
+          <onright>10</onright>
+          <onleft>10</onleft>
+          <onup>1</onup>
+          <ondown>11</ondown>
+        </control>
+        <control type="radiobutton" id="170">
           <label>Sun</label>
+          <posx>85</posx>
+          <posy>0</posy>
+          <height>40</height>
+          <width>80</width>
           <font>font13</font>
           <textcolor>grey2</textcolor>
           <focusedcolor>white</focusedcolor>
@@ -398,12 +400,11 @@
           <ondown>11</ondown>
         </control>
         <control type="radiobutton" id="177">
-          <description>episode recording</description>
-          <posx>170</posx>
-          <posy>45</posy>
+          <label>Any</label>
+          <posx>340</posx>
+          <posy>0</posy>
           <height>40</height>
           <width>80</width>
-          <label>Any</label>
           <font>font13</font>
           <textcolor>grey2</textcolor>
           <focusedcolor>white</focusedcolor>
@@ -418,9 +419,9 @@
       </control>
     </control>
 
-    <control type="group" id="9001" descripton="Ok-Cancel buttons">
-      <posx>500</posx>
-      <posy>122.5</posy>
+    <control type="group" id="9001" descripton="Ok-Cancel-default buttons">
+      <posx>650</posx>
+      <posy>65</posy>
       <control type="button" id="1">
         <description>Ok Button</description>
         <posx>0</posx>
@@ -440,8 +441,8 @@
       </control>
       <control type="button" id="2">
         <description>Cancel Button</description>
-        <posx>125</posx>
-        <posy>0</posy>
+        <posx>0</posx>
+        <posy>45</posy>
         <width>100</width>
         <height>40</height>
         <align>center</align>
@@ -449,6 +450,23 @@
         <texturenofocus border="5">button-nofocus.png</texturenofocus>
         <texturefocus border="5">button-focus.png</texturefocus>
         <label>222</label>
+        <font>font12_title</font>
+        <onup>14</onup>
+        <onleft>1</onleft>
+        <onright>1</onright>
+        <ondown>10</ondown>
+      </control>
+      <control type="button" id="180">
+        <description>reset defaults</description>
+        <posx>0</posx>
+        <posy>100</posy>
+        <width>100</width>
+        <height>40</height>
+        <align>center</align>
+        <aligny>center</aligny>
+        <texturenofocus border="5">button-nofocus.png</texturenofocus>
+        <texturefocus border="5">button-focus.png</texturefocus>
+        <label>Defaults</label>
         <font>font12_title</font>
         <onup>14</onup>
         <onleft>1</onleft>

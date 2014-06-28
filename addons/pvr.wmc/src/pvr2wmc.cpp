@@ -437,97 +437,119 @@ PVR_ERROR Pvr2Wmc::AddTimer(const PVR_TIMER &xTmr)
 	int runType;								// the type of episodes to record (all, new, live)
 	bool anyChannel;							// whether to rec series from ANY channel
 	bool anyTime;								// whether to rec series at ANY time
+	int days;									// the says of week to record on
+	int recDay;									// the day of the week the rec happens on
 	bool useObsoleteDlog = false;
+	vector<CStdString> preDefPaddings;
+	int preIndex;
+	vector<CStdString> postDefPaddings;
+	int postIndex;
+	vector<CStdString> keepLengths;
+	int keepLengthIndex;
+	vector<CStdString> maxEpisodesAmounts;
+	int maxEpisodeIndex;
+	bool forcePrePad, forcePostPad;
 
 	CStdString command;
 	CStdString timerStr = Timer2String(xTmr);	// convert timer to string
 
 	if (xTmr.startTime != 0 && xTmr.iEpgUid != -1)		// if we are NOT doing an 'instant' record (=0) AND not a 'manual' record (=-1)
 	{
-
+		
 		command = "GetShowInfo" + timerStr;				// request data about the show that will be recorded by the timer
 		vector<CStdString> info;						// holds results from server
 		info = _socketClient.GetVector(command, true);	// get results from server
 
 		if (isServerError(info))
-		{
 			return PVR_ERROR_SERVER_ERROR;
-		} 
-		else 
+
+		isSeries = info[0] == "True";					// first string determines if show is a series
+
+		// get the rest of the show info results is a string that contains default values for series programs
+		vector<CStdString> v = split(info[1].c_str(), "|");		
+
+		if (info.size() > 2)					// if we got a ProgramType (third) parameter attempt to use new style rec prefs dialog
 		{
-			isSeries = info[0] == "True";				// first string determines if show is a series
+			std::string pType = info[2];		// get program type
 
-			// get the rest of the show info results is a string that contains default values for series programs
-			vector<CStdString> v = split(info[1].c_str(), "|");		
+			vector<CStdString> def = _socketClient.GetVector("GetNewTimerDefaults|" + pType, true);
+				
+			// get starting (default) values from GetNewTimerDefaults
+			forcePrePad = def[2] == "True";
+			forcePostPad = def[3] == "True";
+			anyChannel = def[4] == "True";
+			runType = atoi(def[5].c_str());							// any=0, firstRun=1, live=2
+			days = atoi(def[6].c_str());							// days of week
+			anyTime = def[7] == "True";								// record time of day
+			preDefPaddings = split(def[8], ",");
+			preIndex = atoi(def[9].c_str());
+			postDefPaddings = split(def[10], ",");
+			postIndex = atoi(def[11].c_str());
+			keepLengths = split(def[12], ",");
+			keepLengthIndex = atoi(def[13].c_str());
+			maxEpisodesAmounts = split(def[14], ",");
+			maxEpisodeIndex = atoi(def[15].c_str());
+				
+			// some params are from GetShowInfo call
+			recDay = atoi(v[7].c_str());							// the day of week recording happens on (Sunday=0)
+				
+			CDialogRecordPref2 vWindow2(isSeries, recSeries, runType, anyChannel, anyTime, days, recDay, "10"/*keepLength*/,
+				preDefPaddings, preIndex, postDefPaddings, postIndex,
+				forcePrePad, forcePostPad,
+				keepLengths, keepLengthIndex, maxEpisodesAmounts, maxEpisodeIndex,
+				v[4]/*channelName*/, v[5]/*=startTimeStr*/, v[6]/*showName*/  // these values were received from GetShowInfo
+			);
+				
+			int dlogResult = vWindow2.DoModal();
 
-			if (v.size() < 7)
+			if (dlogResult == 1)
 			{
-				XBMC->Log(LOG_DEBUG, "Wrong number of fields xfered for AddTimer data");
-				return PVR_ERROR_SERVER_ERROR;
+				// get values
+				days = vWindow2.GetDaysOfWeek();
+				preIndex = vWindow2.GetPrePaddingIndex();
+				postIndex = vWindow2.GetPostPaddingIndex();
 			}
-
-			if (info.size() > 2)					// if we got a ProgramType (third) parameter attempt to use new style rec prefs dialog
-			{
-				std::string pType = info[2];		// get program type
-
-				vector<CStdString> def = _socketClient.GetVector("GetNewTimerDefaults|" + pType, true);
-				
-				// get starting (default) values from GetNewTimerDefaults
-				anyChannel = def[4] == "True";
-				runType = atoi(def[5].c_str());							// any=0, firstRun=1, live=2
-				anyTime = def[7] == "True";
-				
-				CDialogRecordPref2 vWindow2(	recSeries, runType, anyChannel, anyTime,
-					v[4]/*channelName*/, v[5]/*=startTimeStr*/, v[6]/*showName*/  // these values were received from GetShowInfo
-				);
-				
-				int dlogResult = vWindow2.DoModal();
-
-				if (dlogResult == 1)
-				{
-				}
-				else if (dlogResult == 0)
-					return PVR_ERROR_NO_ERROR;		// user canceled timer in dialog
-				else
-				{
-					// failed to open a new style dialog probably due to skin support
-					XBMC->Log(LOG_DEBUG, "new style recording pref dialog could not be created - probably due to no skin support");
-					useObsoleteDlog = true;			
-				}
-			}
+			else if (dlogResult == 0)
+				return PVR_ERROR_NO_ERROR;		// user canceled timer in dialog
 			else
-				useObsoleteDlog = true;				// try the old dialog (swmc didn't give back enough params for new dialog)
+			{
+				// failed to open a new style dialog probably due to skin support
+				XBMC->Log(LOG_DEBUG, "new style recording pref dialog could not be created - probably due to no skin support");
+				useObsoleteDlog = true;			
+			}
+		}
+		else
+			useObsoleteDlog = true;				// try the old dialog (swmc didn't give back enough params for new dialog)
 			
 
-			if (isSeries && useObsoleteDlog)				// if the show is a series and new dialog type failed
+		if (isSeries && useObsoleteDlog)				// if the show is a series and new dialog type failed
+		{
+
+			// fill in params for dialog window from data recieved in GetShowInfo
+			recSeries = v[0] == "True";								// get reset of params for dialog windows
+			runType = atoi(v[1].c_str());							// any=0, firstRun=1, live=2
+			anyChannel = v[2] == "True";
+			anyTime = v[3] == "True";
+			// start dialogwindow
+			CDialogRecordPref vWindow(	recSeries, runType, anyChannel, anyTime,
+				v[4]/*channelName*/, v[5]/*=startTimeStr*/, v[6]/*showName*/);
+
+			int dlogResult = vWindow.DoModal();
+			if (dlogResult == 1)								// present dialog with recording options
 			{
-
-				// fill in params for dialog window from data recieved in GetShowInfo
-				recSeries = v[0] == "True";								// get reset of params for dialog windows
-				runType = atoi(v[1].c_str());							// any=0, firstRun=1, live=2
-				anyChannel = v[2] == "True";
-				anyTime = v[3] == "True";
-				// start dialogwindow
-				CDialogRecordPref vWindow(	recSeries, runType, anyChannel, anyTime,
-					v[4]/*channelName*/, v[5]/*=startTimeStr*/, v[6]/*showName*/);
-
-				int dlogResult = vWindow.DoModal();
-				if (dlogResult == 1)								// present dialog with recording options
+				recSeries = vWindow.RecSeries;
+				if (recSeries)
 				{
-					recSeries = vWindow.RecSeries;
-					if (recSeries)
-					{
-						runType = vWindow.RunType;					// the type of episodes to record (0->all, 1->new, 2->live)
-						anyChannel = vWindow.AnyChannel;			// whether to rec series from ANY channel
-						anyTime = vWindow.AnyTime;					// whether to rec series at ANY time
-					}
+					runType = vWindow.RunType;					// the type of episodes to record (0->all, 1->new, 2->live)
+					anyChannel = vWindow.AnyChannel;			// whether to rec series from ANY channel
+					anyTime = vWindow.AnyTime;					// whether to rec series at ANY time
 				}
-				else if (dlogResult == 0)
-					return PVR_ERROR_NO_ERROR;						// user canceled timer in dialog
-				else if (dlogResult == -1)							// if dlog result is -1 the dialog was not created
-				{
-					XBMC->Log(LOG_DEBUG, "old style recording pref dialog could not be created - probably due to no skin support");
-				}
+			}
+			else if (dlogResult == 0)
+				return PVR_ERROR_NO_ERROR;						// user canceled timer in dialog
+			else if (dlogResult == -1)							// if dlog result is -1 the dialog was not created
+			{
+				XBMC->Log(LOG_DEBUG, "old style recording pref dialog could not be created - probably due to no skin support");
 			}
 		}
 	}
