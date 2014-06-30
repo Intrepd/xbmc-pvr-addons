@@ -32,7 +32,7 @@ class CDialogRecordPref2
 
 public:
   CDialogRecordPref2(bool isSeries, bool recSeries, int runtype, bool anyChannel, bool anyTime,
-					int days, int recDay, CStdString keepLength,
+					int days, int recDay,
 					vector<CStdString> preDefPaddings, int preDefIndex, vector<CStdString> postDefPaddings, int postDefIndex,
 					bool isPrePadForced, bool isPostPadForced,
 					vector<CStdString> keepLengths, int keepLengthIndex, vector<CStdString> maxEpisodesAmounts, int maxEpisodeIndex,
@@ -45,14 +45,21 @@ public:
 	
 
 	// value returned to caller
-	bool RecSeries;						// values returned
-	int RunType;
-	bool AnyChannel;
-	bool AnyTime;
-	CStdString KeepLimit;
+	//bool RecSeries;						// values returned
+	//int RunType;
+	//bool AnyChannel;
+	//bool AnyTime;
+	bool GetRecSeries();
+	int GetRunType();
+	bool GetAnyChannel();
+	bool GetAnyTime();
 	int GetDaysOfWeek();
 	int GetPrePaddingIndex();
 	int GetPostPaddingIndex();
+	bool GetForcePrePad();
+	bool GetForcePostPad();
+	int GetKeepLengthIndex();
+	int GetMaxEpisodeIndex();
 
 private:
 	CStdString _currentChannel;			// these are just used for dialog display

@@ -80,7 +80,7 @@ public:
 
 private:
 	int _serverBuild;
-	CStdString Timer2String(const PVR_TIMER &xTmr);
+	CStdString Timer2String(const PVR_TIMER &xTmr, int prePadOverride = -1, int postPadOverride = -1);
 	CStdString Channel2String(const PVR_CHANNEL &xTmr);
 
 	Socket _socketClient;
