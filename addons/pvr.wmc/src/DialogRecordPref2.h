@@ -37,18 +37,14 @@ public:
 					bool isPrePadForced, bool isPostPadForced,
 					vector<CStdString> keepLengths, int keepLengthIndex, vector<CStdString> maxEpisodesAmounts, int maxEpisodeIndex,
 					CStdString currentChannelName, CStdString currentAirTime, CStdString showName);
-	virtual ~CDialogRecordPref2();
 
+	virtual ~CDialogRecordPref2();
 	bool Show();
 	void Close();
-	int DoModal();						// returns -1=> load failed, 0=>canceled, 1=>confirmed
+	int DoModal();			// if it returns -1=> load failed, 0=>canceled, 1=>confirmed
 	
 
-	// value returned to caller
-	//bool RecSeries;						// values returned
-	//int RunType;
-	//bool AnyChannel;
-	//bool AnyTime;
+	// values returned to caller
 	bool GetRecSeries();
 	int GetRunType();
 	bool GetAnyChannel();
@@ -60,6 +56,7 @@ public:
 	bool GetForcePostPad();
 	int GetKeepLengthIndex();
 	int GetMaxEpisodeIndex();
+	int GetPriorityIndex();
 
 private:
 	CStdString _currentChannel;			// these are just used for dialog display
@@ -72,7 +69,6 @@ private:
 	void SetDefaults();
 	
 private:
-	CAddonGUIRadioButton *_radioRecEpisode;
 	CAddonGUIRadioButton *_radioRecSeries;
 	CAddonGUIRadioButton *_radioAnyDay;
 	CAddonGUIRadioButton *_radioRecDay;
@@ -85,6 +81,7 @@ private:
 	CAddonGUISpinControl *_spinPostPadding;
 	CAddonGUISpinControl *_spinKeepLength;
 	CAddonGUISpinControl *_spinMaxEpisode;
+	CAddonGUISpinControl *_spinPriority;
 
 
   // following is needed for every dialog
@@ -101,7 +98,6 @@ private:
   static bool OnFocusCB(GUIHANDLE cbhdl, int controlId);
   static bool OnInitCB(GUIHANDLE cbhdl);
   static bool OnActionCB(GUIHANDLE cbhdl, int actionId);
-
 
 };
 
