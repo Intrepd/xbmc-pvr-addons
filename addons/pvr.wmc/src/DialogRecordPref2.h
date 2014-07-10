@@ -31,12 +31,18 @@ class CDialogRecordPref2
 {
 
 public:
-  CDialogRecordPref2(bool isSeries, bool recSeries, int runtype, bool anyChannel, bool anyTime,
+  CDialogRecordPref2(
+					bool createNewTimer,
+					bool isSeries, bool recSeries, int runtype, bool anyChannel, bool anyTime,
 					int days, int recDay,
-					vector<CStdString> preDefPaddings, int preDefIndex, vector<CStdString> postDefPaddings, int postDefIndex,
+					vector<CStdString> preDefPaddings, int preValue, vector<CStdString> postDefPaddings, int postValue,
 					bool isPrePadForced, bool isPostPadForced,
-					vector<CStdString> keepLengths, int keepLengthIndex, vector<CStdString> maxEpisodesAmounts, int maxEpisodeIndex,
-					CStdString currentChannelName, CStdString currentAirTime, CStdString showName);
+					vector<CStdString> keepLengths, int keepLength,
+					vector<CStdString> maxEpisodesAmounts, int maxEpisode,
+					vector<CStdString> priorityValues, int priorityValue,
+					PVR_TIMER_STATE tmrState,
+					CStdString currentChannelName, CStdString currentAirTime, CStdString airDateTime,
+					CStdString showName, CStdString shortDescription);
 
 	virtual ~CDialogRecordPref2();
 	bool Show();
@@ -50,18 +56,14 @@ public:
 	bool GetAnyChannel();
 	bool GetAnyTime();
 	int GetDaysOfWeek();
-	int GetPrePaddingIndex();
-	int GetPostPaddingIndex();
+	int GetPrePadding();
+	int GetPostPadding();
 	bool GetForcePrePad();
 	bool GetForcePostPad();
-	int GetKeepLengthIndex();
-	int GetMaxEpisodeIndex();
-	int GetPriorityIndex();
+	int GetKeepLength();
+	int GetMaxEpisode();
+	int GetPriority();
 
-private:
-	CStdString _currentChannel;			// these are just used for dialog display
-	CStdString _currentAirTime;
-	CStdString _showName;
 private:
 	void DaysOfWeekVisible(bool visable);
 	void DaysOfWeekSetSelected(bool val);

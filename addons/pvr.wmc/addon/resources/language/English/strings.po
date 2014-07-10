@@ -164,7 +164,7 @@ msgid "Channel:"
 msgstr ""
 
 msgctxt "#30108"
-msgid "Any Channel"
+msgid "Any channel"
 msgstr ""
 
 msgctxt "#30110"
@@ -265,4 +265,32 @@ msgstr ""
 
 msgctxt "#30141"
 msgid "as many as possible"
+msgstr ""
+
+msgctxt "#30142"
+msgid "Record priority:"
+msgstr ""
+
+msgctxt "#30143"
+msgid "highest"
+msgstr ""
+
+msgctxt "#30144"
+msgid "higher than conflicting programs"
+msgstr ""
+
+msgctxt "#30145"
+msgid "lower than conflicting programs"
+msgstr ""
+
+msgctxt "#30146"
+msgid "lowest"
+msgstr ""
+
+msgctxt "#30147"
+msgid "normal"
+msgstr ""
+
+msgctxt "#30148"
+msgid "Status: %s"
 msgstr ""

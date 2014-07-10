@@ -1,6 +1,10 @@
 <window>
   <defaultcontrol always="true">1</defaultcontrol>
   <onload>SetProperty(isSeries,false)</onload>
+  <!--<onload>SetProperty(DisabledCustomColor,10FFFFFF)</onload>-->
+  <variable name="DisabledCustomColor">
+    <value>20FFFFFF</value>
+  </variable>
   <coordinates>
     <system>1</system>
     <posx>240</posx>
@@ -14,7 +18,7 @@
       <posx>0</posx>
       <posy>0</posy>
       <width>800</width>
-      <height>650</height>
+      <height>620</height>
       <texture border="40">DialogBack.png</texture>
     </control>
     <control type="image">
@@ -27,10 +31,10 @@
     </control>
     
     <!-- window title will hold the name of the show -->
-    <control type="label" id = "20" description="window title">
+    <control type="label" id = "19" description="window title">
       <posx>40</posx>
       <posy>20</posy>
-      <width>720</width>
+      <width>700</width>
       <height>30</height>
       <font>font13_title</font>
       <textcolor>white</textcolor>
@@ -57,67 +61,64 @@
       <ondown>1</ondown>
       <visible>system.getbool(input.enablemouse)</visible>
     </control>
-    
-    <!--<control type="group" description ="series-episode radio buttons">
-      <posx>40</posx>
-      <posy>65</posy>
-      <width>420</width>
-      <height>100</height>
-      
-      <control type="radiobutton" id="10" description="episode">
-        <posx>0</posx>
-        <posy>0</posy>
-        <height>40</height>
-        <width>270</width>
-        <label>$ADDON[pvr.wmc 30101]</label>
-        <label>Episode</label>
-        <font>font13</font>
-        <textcolor>grey2</textcolor>
-        <focusedcolor>white</focusedcolor>
-        <texturenofocus border="5">button-nofocus.png</texturenofocus>
-        <texturefocus border="5">button-focus2.png</texturefocus>
-        <onright>10</onright>
-        <onleft>10</onleft>
-        <onup>1</onup>
-        <ondown>11</ondown>
-      </control>
-      
-      <control type="radiobutton" id="11" description="series">
-        <posx>295</posx>
-        <posy>0</posy>
-        <height>40</height>
-        <width>270</width>
-        --><!--<label>$ADDON[pvr.wmc 30102]</label>--><!--
-        <label>Series</label>
-        <font>font13</font>
-        <textcolor>grey2</textcolor>
-        <focusedcolor>white</focusedcolor>
-        <texturenofocus border="5">button-nofocus.png</texturenofocus>
-        <texturefocus border="5">button-focus2.png</texturefocus>
-        <onright>11</onright>
-        <onleft>11</onleft>
-        <onup>10</onup>
-        <ondown>12</ondown>
-      </control>
-    </control>
 
-    <control type="label" description="Settings:">
-      <posx>20</posx>
-      <posy>125</posy>
+    <!-- displays info about the show -->
+    <control type="label" description="short description" id="23">
+      <posx>40</posx>
+      <posy>25</posy>
       <width>720</width>
-      <height>30</height>
-      <font>font13</font>
+      <height>110</height>
+      <!--<font>font10_title</font>-->
+      <font>font10</font>
       <label>Settings:</label>
       <align>left</align>
       <aligny>center</aligny>
       <textcolor>white</textcolor>
-    </control>-->
+    </control>
     
-    <control type="group" descripton="universal settings" id="150">
+    <!-- display airing info -->
+    <control type="label" description="airDateInfo" id="24">
+      <posx>40</posx>
+      <posy>50</posy>
+      <width>550</width>
+      <height>110</height>
+      <font>font10</font>
+      <align>left</align>
+      <aligny>center</aligny>
+      <textcolor>white</textcolor>
+    </control>
+    
+    <!-- channel info -->
+    <control type="label" description="channelInfo" id="25">
+      <posx>350</posx>
+      <posy>50</posy>
+      <width>550</width>
+      <height>110</height>
+      <font>font10</font>
+      <align>left</align>
+      <aligny>center</aligny>
+      <textcolor>white</textcolor>
+    </control>
+
+    <!-- status info -->
+    <control type="label" description="statusInfo" id="26">
+      <posx>590</posx>
+      <posy>525</posy>
+      <width>560</width>
+      <height>110</height>
+      <font>font13</font>
+      <label>Status: will record</label>
+      <align>right</align>
+      <aligny>center</aligny>
+      <textcolor>yellow</textcolor>
+    </control>
+    
+    <control type="group" descripton="all settings" id="150">
       <posx>40</posx>
       <posy>120</posy>
-      <width>420</width>
+      <width>550</width>
       <height>150</height>
+      <include>VisibleFadeEffect</include>
       
       <control type="radiobutton" id="11" description="recSeries">
         <posx>0</posx>
@@ -130,8 +131,10 @@
         <font>font13</font>
         <textcolor>grey2</textcolor>
         <focusedcolor>white</focusedcolor>
-        <texturenofocus border="5">button-nofocus.png</texturenofocus>
-        <texturefocus border="5">button-focus2.png</texturefocus>
+        <!--<texturenofocus border="0,5,0,5">button-nofocus.png</texturenofocus>
+        <texturefocus border="5">button-focus2.png</texturefocus>-->
+        <texturefocus border="0,2,0,2">MenuItemFO.png</texturefocus>
+        <texturenofocus border="0,2,0,2">MenuItemNF.png</texturenofocus>
         <onright>9001</onright>
         <onleft>11</onleft>
         <onup>1</onup>
@@ -141,14 +144,16 @@
       
       <control type="spincontrolex" id="112" description="pre-pad">
         <posx>0</posx>
-        <posy>45</posy>
+        <posy>40</posy>
         <width>450</width>
         <height>40</height>
         <font>font13</font>
         <textcolor>grey2</textcolor>
         <focusedcolor>white</focusedcolor>
-        <texturenofocus border="5">button-nofocus.png</texturenofocus>
-        <texturefocus border="5">button-focus2.png</texturefocus>
+        <!--<texturenofocus border="0,5,0,5">button-nofocus.png</texturenofocus>
+        <texturefocus border="5">button-focus2.png</texturefocus>-->
+        <texturefocus border="0,2,0,2">MenuItemFO.png</texturefocus>
+        <texturenofocus border="0,2,0,2">MenuItemNF.png</texturenofocus>
         <label>Start recording</label>
         <onright>113</onright>
         <onleft>112</onleft>
@@ -159,14 +164,16 @@
       
       <control type="spincontrolex" id="114" description="post-pad">
         <posx>0</posx>
-        <posy>90</posy>
+        <posy>80</posy>
         <width>450</width>
         <height>40</height>
         <font>font13</font>
         <textcolor>grey2</textcolor>
         <focusedcolor>white</focusedcolor>
-        <texturenofocus border="5">button-nofocus.png</texturenofocus>
-        <texturefocus border="5">button-focus2.png</texturefocus>
+        <!--<texturenofocus border="0,5,0,5">button-nofocus.png</texturenofocus>
+        <texturefocus border="5">button-focus2.png</texturefocus>-->
+        <texturefocus border="0,2,0,2">MenuItemFO.png</texturefocus>
+        <texturenofocus border="0,2,0,2">MenuItemNF.png</texturenofocus>
         <label>Stop recording</label>
         <onright>115</onright>
         <onleft>114</onleft>
@@ -176,15 +183,17 @@
       
       <control type="spincontrolex" id="117" description="priority">
         <posx>0</posx>
-        <posy>135</posy>
+        <posy>120</posy>
         <height>40</height>
         <width>550</width>
         <label>Scheduler priority:</label>
         <font>font13</font>
         <textcolor>grey2</textcolor>
         <focusedcolor>white</focusedcolor>
-        <texturenofocus border="5">button-nofocus.png</texturenofocus>
-        <texturefocus border="5">button-focus2.png</texturefocus>
+        <!--<texturenofocus border="0,5,0,5">button-nofocus.png</texturenofocus>
+        <texturefocus border="5">button-focus2.png</texturefocus>-->
+        <texturefocus border="0,2,0,2">MenuItemFO.png</texturefocus>
+        <texturenofocus border="0,2,0,2">MenuItemNF.png</texturenofocus>
         <onright>9001</onright>
         <onleft>117</onleft>
         <onup>114</onup>
@@ -193,102 +202,106 @@
 
       <control type="spincontrolex" id="116" description="keepLength">
         <posx>0</posx>
-        <posy>180</posy>
+        <posy>160</posy>
         <width>550</width>
         <height>40</height>
         <font>font13</font>
         <textcolor>grey2</textcolor>
         <focusedcolor>white</focusedcolor>
-        <texturenofocus border="5">button-nofocus.png</texturenofocus>
-        <texturefocus border="5">button-focus2.png</texturefocus>
+        <!--<texturenofocus border="0,5,0,5">button-nofocus.png</texturenofocus>
+        <texturefocus border="5">button-focus2.png</texturefocus>-->
+        <texturefocus border="0,2,0,2">MenuItemFO.png</texturefocus>
+        <texturenofocus border="0,2,0,2">MenuItemNF.png</texturenofocus>
         <label>Keep until</label>
         <onright>9001</onright>
         <onleft>116</onleft>
         <onup>117</onup>
-        <ondown>151</ondown>
+        <ondown>12</ondown>
       </control>
       
       <control type="radiobutton" id="113" description="forcePre">
         <posx>449</posx>
-        <posy>45</posy>
+        <posy>40</posy>
         <height>40</height>
         <width>101</width>
         <label>Force</label>
         <font>font13</font>
         <textcolor>grey2</textcolor>
         <focusedcolor>white</focusedcolor>
-        <!--<texturenofocus border="5">button-nofocus.png</texturenofocus>-->
-        <texturefocus border="5">button-focus2.png</texturefocus>
+        <!--<texturenofocus border="0,5,0,5">button-nofocus.png</texturenofocus>
+        <texturefocus border="5">button-focus2.png</texturefocus>-->
+        <texturefocus border="0,2,0,2">MenuItemFO.png</texturefocus>
+        <texturenofocus border="0,2,0,2">MenuItemNF.png</texturenofocus>
         <onright>9001</onright>
         <onleft>112</onleft>
         <onup>11</onup>
         <ondown>115</ondown>
       </control>
-      
       <control type="radiobutton" id="115" description="forcePost">
         <posx>449</posx>
-        <posy>90</posy>
+        <posy>80</posy>
         <height>40</height>
         <width>101</width>
         <label>Force</label>
         <font>font13</font>
         <textcolor>grey2</textcolor>
         <focusedcolor>white</focusedcolor>
-        <texturenofocus border="5">button-nofocus.png</texturenofocus>
-        <texturefocus border="5">button-focus2.png</texturefocus>
+        <!--<texturenofocus border="0,5,0,5">button-nofocus.png</texturenofocus>
+        <texturefocus border="5">button-focus2.png</texturefocus>-->
+        <texturefocus border="0,2,0,2">MenuItemFO.png</texturefocus>
+        <texturenofocus border="0,2,0,2">MenuItemNF.png</texturenofocus>
         <onright>9001</onright>
         <onleft>114</onleft>
         <onup>113</onup>
         <ondown>117</ondown>
       </control>
-      
-    </control>
 
-    <control type="image" description="separator">
+
+      <control type="image" description="separator">
       <description>separator image</description>
       <left>40</left>
-      <top>343</top>
+      <top>200</top>
       <width>550</width>
       <height>2</height>
       <texture>separator2.png</texture>
       <colordiffuse>40FFFFFF</colordiffuse>
     </control>
-    
-    <control type="group" descripton="seriesSettings" id="151">
-      <posx>40</posx>
-      <posy>348</posy>
-      <width>550</width>
-      <height>150</height>x
+
       <control type="spincontrolex" id="12">
         <description>series runtype</description>
         <posx>0</posx>
-        <posy>0</posy>
+        <posy>200</posy>
         <width>550</width> <!--420-->-->
         <height>40</height>
         <font>font13</font>
         <textcolor>grey2</textcolor>
         <focusedcolor>white</focusedcolor>
-        <texturenofocus border="5">button-nofocus.png</texturenofocus>
-        <texturefocus border="5">button-focus2.png</texturefocus>
+        <!--<texturenofocus border="0,5,0,5">button-nofocus.png</texturenofocus>
+        <texturefocus border="5">button-focus2.png</texturefocus>-->
+        <texturefocus border="0,2,0,2">MenuItemFO.png</texturefocus>
+        <texturenofocus border="0,2,0,2">MenuItemNF.png</texturenofocus>
         <label>$ADDON[pvr.wmc 30103]</label>
         <onright>9001</onright>
         <onleft>12</onleft>
-        <onup>150</onup>
+        <onup>116</onup>
         <ondown>13</ondown>
         <enable>SubString(Control.GetLabel(11),*)</enable>
       </control>
 
+
       <control type="spincontrolex" id="13">
         <description>channel choice</description>
         <posx>0</posx>
-        <posy>45</posy>
+        <posy>240</posy>
         <width>550</width>
         <height>40</height>
         <font>font13</font>
         <textcolor>grey2</textcolor>
         <focusedcolor>white</focusedcolor>
-        <texturenofocus border="5">button-nofocus.png</texturenofocus>
-        <texturefocus border="5">button-focus2.png</texturefocus>
+        <!--<texturenofocus border="0,5,0,5">button-nofocus.png</texturenofocus>
+        <texturefocus border="5">button-focus2.png</texturefocus>-->
+        <texturefocus border="0,2,0,2">MenuItemFO.png</texturefocus>
+        <texturenofocus border="0,2,0,2">MenuItemNF.png</texturenofocus>
         <label>$ADDON[pvr.wmc 30107]</label>
         <onright>9001</onright>
         <onleft>13</onleft>
@@ -297,17 +310,20 @@
         <enable>SubString(Control.GetLabel(11),*)</enable>
       </control>
 
+
       <control type="spincontrolex" id="14">
         <description>airtime series choice</description>
         <posx>0</posx>
-        <posy>90</posy>
+        <posy>280</posy>
         <width>550</width>
         <height>40</height>
         <font>font13</font>
         <textcolor>grey2</textcolor>
         <focusedcolor>white</focusedcolor>
-        <texturenofocus border="5">button-nofocus.png</texturenofocus>
-        <texturefocus border="5">button-focus2.png</texturefocus>
+        <!--<texturenofocus border="0,5,0,5">button-nofocus.png</texturenofocus>
+        <texturefocus border="5">button-focus2.png</texturefocus>-->
+        <texturefocus border="0,2,0,2">MenuItemFO.png</texturefocus>
+        <texturenofocus border="0,2,0,2">MenuItemNF.png</texturenofocus>
         <label>$ADDON[pvr.wmc 30110]</label>
         <onright>9001</onright>
         <onleft>14</onleft>
@@ -318,14 +334,16 @@
 
       <control type="spincontrolex" id="15" description="recording limit">
         <posx>0</posx>
-        <posy>135</posy>
+        <posy>320</posy>
         <width>550</width>
         <height>40</height>
         <font>font13</font>
         <textcolor>grey2</textcolor>
         <focusedcolor>white</focusedcolor>
-        <texturenofocus border="5">button-nofocus.png</texturenofocus>
-        <texturefocus border="5">button-focus2.png</texturefocus>
+        <!--<texturenofocus border="0,5,0,5">button-nofocus.png</texturenofocus>
+        <texturefocus border="5">button-focus2.png</texturefocus>-->
+        <texturefocus border="0,2,0,2">MenuItemFO.png</texturefocus>
+        <texturenofocus border="0,2,0,2">MenuItemNF.png</texturenofocus>
         <label>Keep only:</label>
         <onright>9001</onright>
         <onleft>15</onleft>
@@ -334,155 +352,198 @@
         <enable>SubString(Control.GetLabel(11),*)</enable>
       </control>
 
+
+      <control type="radiobutton" id="171">
+        <label>Mon</label>
+        <posx>0</posx>
+        <posy>360</posy>
+        <height>40</height>
+        <width>80</width>
+        <font>font13</font>
+        <textcolor>grey2</textcolor>
+        <focusedcolor>white</focusedcolor>
+        <!--<texturenofocus border="0,5,0,5">button-nofocus.png</texturenofocus>
+        <texturefocus border="5">button-focus2.png</texturefocus>-->
+        <texturefocus border="0,2,0,2">MenuItemFO.png</texturefocus>
+        <texturenofocus border="0,2,0,2">MenuItemNF.png</texturenofocus>
+        <onright>172</onright>
+        <onleft>171</onleft>
+        <onup>15</onup>
+        <ondown>175</ondown>
+        <enable>SubString(Control.GetLabel(11),*)</enable>
+      </control>
+      <control type="radiobutton" id="172">
+        <label>Tue</label>
+        <posx>85</posx>
+        <posy>360</posy>
+        <height>40</height>
+        <width>80</width>
+        <font>font13</font>
+        <textcolor>grey2</textcolor>
+        <focusedcolor>white</focusedcolor>
+        <!--<texturenofocus border="0,5,0,5">button-nofocus.png</texturenofocus>
+        <texturefocus border="5">button-focus2.png</texturefocus>-->
+        <texturefocus border="0,2,0,2">MenuItemFO.png</texturefocus>
+        <texturenofocus border="0,2,0,2">MenuItemNF.png</texturenofocus>
+        <onright>173</onright>
+        <onleft>171</onleft>
+        <onup>15</onup>
+        <ondown>176</ondown>
+        <enable>SubString(Control.GetLabel(11),*)</enable>
+        <!--<disabledcolor>Window.Property(DisabledCustomColor)</disabledcolor>-->
+        <!--<disabledcolor>$VAR[DisabledCustomColor]</disabledcolor>-->
+        <!--<disabledcolor>20FFFFFF</disabledcolor>-->
+      </control>
+      <control type="radiobutton" id="173">
+        <label>Wed</label>
+        <posx>170</posx>
+        <posy>360</posy>
+        <height>40</height>
+        <width>80</width>
+        <font>font13</font>
+        <textcolor>grey2</textcolor>
+        <focusedcolor>white</focusedcolor>
+        <!--<texturenofocus border="0,5,0,5">button-nofocus.png</texturenofocus>
+        <texturefocus border="5">button-focus2.png</texturefocus>-->
+        <texturefocus border="0,2,0,2">MenuItemFO.png</texturefocus>
+        <texturenofocus border="0,2,0,2">MenuItemNF.png</texturenofocus>
+        <onright>174</onright>
+        <onleft>172</onleft>
+        <onup>15</onup>
+        <ondown>170</ondown>
+        <enable>SubString(Control.GetLabel(11),*)</enable>
+      </control>
+      <control type="radiobutton" id="174">
+        <label>Thu</label>
+        <posx>255</posx>
+        <posy>360</posy>
+        <height>40</height>
+        <width>80</width>
+        <font>font13</font>
+        <textcolor>grey2</textcolor>
+        <focusedcolor>white</focusedcolor>
+        <!--<texturenofocus border="0,5,0,5">button-nofocus.png</texturenofocus>
+        <texturefocus border="5">button-focus2.png</texturefocus>-->
+        <texturefocus border="0,2,0,2">MenuItemFO.png</texturefocus>
+        <texturenofocus border="0,2,0,2">MenuItemNF.png</texturenofocus>
+        <onright>177</onright>
+        <onleft>173</onleft>
+        <onup>15</onup>
+        <ondown>170</ondown>
+        <enable>SubString(Control.GetLabel(11),*)</enable>
+      </control>
+      <control type="radiobutton" id="175">
+        <label>Fri</label>
+        <posx>0</posx>
+        <posy>400</posy>
+        <height>40</height>
+        <width>80</width>
+        <font>font13</font>
+        <textcolor>grey2</textcolor>
+        <focusedcolor>white</focusedcolor>
+        <!--<texturenofocus border="0,5,0,5">button-nofocus.png</texturenofocus>
+        <texturefocus border="5">button-focus2.png</texturefocus>-->
+        <texturefocus border="0,2,0,2">MenuItemFO.png</texturefocus>
+        <texturenofocus border="0,2,0,2">MenuItemNF.png</texturenofocus>
+        <onright>176</onright>
+        <onleft>175</onleft>
+        <onup>171</onup>
+        <ondown>175</ondown>
+        <enable>SubString(Control.GetLabel(11),*)</enable>
+      </control>
+      <control type="radiobutton" id="176">
+        <label>Sat</label>
+        <posx>85</posx>
+        <posy>400</posy>
+        <height>40</height>
+        <width>80</width>
+        <font>font13</font>
+        <textcolor>grey2</textcolor>
+        <focusedcolor>white</focusedcolor>
+        <!--<texturenofocus border="0,5,0,5">button-nofocus.png</texturenofocus>
+        <texturefocus border="5">button-focus2.png</texturefocus>-->
+        <texturefocus border="0,2,0,2">MenuItemFO.png</texturefocus>
+        <texturenofocus border="0,2,0,2">MenuItemNF.png</texturenofocus>
+        <onright>170</onright>
+        <onleft>175</onleft>
+        <onup>172</onup>
+        <ondown>176</ondown>
+        <enable>SubString(Control.GetLabel(11),*)</enable>
+      </control>
+      <control type="radiobutton" id="170">
+        <label>Sun</label>
+        <posx>170</posx>
+        <posy>400</posy>
+        <height>40</height>
+        <width>80</width>
+        <font>font13</font>
+        <textcolor>grey2</textcolor>
+        <focusedcolor>white</focusedcolor>
+        <!--<texturenofocus border="0,5,0,5">button-nofocus.png</texturenofocus>
+        <texturefocus border="5">button-focus2.png</texturefocus>-->
+        <texturefocus border="0,2,0,2">MenuItemFO.png</texturefocus>
+        <texturenofocus border="0,2,0,2">MenuItemNF.png</texturenofocus>
+        <onright>177</onright>
+        <onleft>176</onleft>
+        <onup>173</onup>
+        <ondown>170</ondown>
+        <enable>SubString(Control.GetLabel(11),*)</enable>
+      </control>
+      <!-- any day button -->
+      <control type="radiobutton" id="177">
+        <label>Any day</label>
+        <posx>430</posx>
+        <posy>360</posy>
+        <height>40</height>
+        <width>120</width>
+        <font>font13</font>
+        <textcolor>grey2</textcolor>
+        <focusedcolor>white</focusedcolor>
+        <!--<texturenofocus border="0,5,0,5">button-nofocus.png</texturenofocus>
+        <texturefocus border="5">button-focus2.png</texturefocus>-->
+        <texturefocus border="0,2,0,2">MenuItemFO.png</texturefocus>
+        <texturenofocus border="0,2,0,2">MenuItemNF.png</texturenofocus>
+        <onright>9001</onright>
+        <onleft>174</onleft>
+        <onup>15</onup>
+        <ondown>170</ondown>
+        <enable>SubString(Control.GetLabel(11),*)</enable>
+      </control>
+      
+    </control>
+
+
+
+    <!--<control type="image" description="separator">
+      <description>separator image</description>
+      <left>40</left>
+      <top>343</top>
+      <width>550</width>
+      <height>2</height>
+      <texture>separator2.png</texture>
+      <colordiffuse>40FFFFFF</colordiffuse>
+    </control>-->
+    
+    <!--<control type="group" descripton="seriesSettings" id="151">
+      <posx>40</posx>
+      <posy>348</posy>
+      <width>550</width>
+      <height>150</height>x
+
+
+
       <control type="group" descripton="days of week">
         <posx>0</posx>
         <posy>180</posy>
         <width>550</width>
         <height>40</height>
-        <control type="radiobutton" id="171">
-          <label>Mon</label>
-          <posx>0</posx>
-          <posy>0</posy>
-          <height>40</height>
-          <width>80</width>
-          <font>font13</font>
-          <textcolor>grey2</textcolor>
-          <focusedcolor>white</focusedcolor>
-          <texturenofocus border="5">button-nofocus.png</texturenofocus>
-          <texturefocus border="5">button-focus2.png</texturefocus>
-          <onright>172</onright>
-          <onleft>171</onleft>
-          <onup>15</onup>
-          <ondown>175</ondown>
-          <enable>SubString(Control.GetLabel(11),*)</enable>
-        </control>
-        <control type="radiobutton" id="172">
-          <label>Tue</label>
-          <posx>85</posx>
-          <posy>0</posy>
-          <height>40</height>
-          <width>80</width>
-          <font>font13</font>
-          <textcolor>grey2</textcolor>
-          <focusedcolor>white</focusedcolor>
-          <texturenofocus border="5">button-nofocus.png</texturenofocus>
-          <texturefocus border="5">button-focus2.png</texturefocus>
-          <onright>173</onright>
-          <onleft>171</onleft>
-          <onup>15</onup>
-          <ondown>176</ondown>
-          <enable>SubString(Control.GetLabel(11),*)</enable>
-        </control>
-        <control type="radiobutton" id="173">
-          <label>Wed</label>
-          <posx>170</posx>
-          <posy>0</posy>
-          <height>40</height>
-          <width>80</width>
-          <font>font13</font>
-          <textcolor>grey2</textcolor>
-          <focusedcolor>white</focusedcolor>
-          <texturenofocus border="5">button-nofocus.png</texturenofocus>
-          <texturefocus border="5">button-focus2.png</texturefocus>
-          <onright>174</onright>
-          <onleft>172</onleft>
-          <onup>15</onup>
-          <ondown>170</ondown>
-          <enable>SubString(Control.GetLabel(11),*)</enable>
-        </control>
-        <control type="radiobutton" id="174">
-          <label>Thu</label>
-          <posx>255</posx>
-          <posy>0</posy>
-          <height>40</height>
-          <width>80</width>
-          <font>font13</font>
-          <textcolor>grey2</textcolor>
-          <focusedcolor>white</focusedcolor>
-          <texturenofocus border="5">button-nofocus.png</texturenofocus>
-          <texturefocus border="5">button-focus2.png</texturefocus>
-          <onright>177</onright>
-          <onleft>173</onleft>
-          <onup>15</onup>
-          <ondown>170</ondown>
-          <enable>SubString(Control.GetLabel(11),*)</enable>
-        </control>
-        <control type="radiobutton" id="175">
-          <label>Fri</label>
-          <posx>0</posx>
-          <posy>45</posy>
-          <height>40</height>
-          <width>80</width>
-          <font>font13</font>
-          <textcolor>grey2</textcolor>
-          <focusedcolor>white</focusedcolor>
-          <texturenofocus border="5">button-nofocus.png</texturenofocus>
-          <texturefocus border="5">button-focus2.png</texturefocus>
-          <onright>176</onright>
-          <onleft>175</onleft>
-          <onup>171</onup>
-          <ondown>175</ondown>
-          <enable>SubString(Control.GetLabel(11),*)</enable>
-        </control>
-        <control type="radiobutton" id="176">
-          <label>Sat</label>
-          <posx>85</posx>
-          <posy>45</posy>
-          <height>40</height>
-          <width>80</width>
-          <font>font13</font>
-          <textcolor>grey2</textcolor>
-          <focusedcolor>white</focusedcolor>
-          <texturenofocus border="5">button-nofocus.png</texturenofocus>
-          <texturefocus border="5">button-focus2.png</texturefocus>
-          <onright>170</onright>
-          <onleft>175</onleft>
-          <onup>172</onup>
-          <ondown>176</ondown>
-          <enable>SubString(Control.GetLabel(11),*)</enable>
-        </control>
-        <control type="radiobutton" id="170">
-          <label>Sun</label>
-          <posx>170</posx>
-          <posy>45</posy>
-          <height>40</height>
-          <width>80</width>
-          <font>font13</font>
-          <textcolor>grey2</textcolor>
-          <focusedcolor>white</focusedcolor>
-          <texturenofocus border="5">button-nofocus.png</texturenofocus>
-          <texturefocus border="5">button-focus2.png</texturefocus>
-          <onright>177</onright>
-          <onleft>176</onleft>
-          <onup>173</onup>
-          <ondown>170</ondown>
-          <enable>SubString(Control.GetLabel(11),*)</enable>
-        </control>
-        <!-- any day button -->
-        <control type="radiobutton" id="177">
-          <label>Any day</label>
-          <posx>430</posx>
-          <posy>0</posy>
-          <height>40</height>
-          <width>120</width>
-          <font>font13</font>
-          <textcolor>grey2</textcolor>
-          <focusedcolor>white</focusedcolor>
-          <texturenofocus border="5">button-nofocus.png</texturenofocus>
-          <texturefocus border="5">button-focus2.png</texturefocus>
-          <onright>9001</onright>
-          <onleft>174</onleft>
-          <onup>15</onup>
-          <ondown>170</ondown>
-          <enable>SubString(Control.GetLabel(11),*)</enable>
-        </control>
         
       </control>
-    </control>
+    </control>-->
 
     <control type="group" id="9001" descripton="Ok-Cancel-default buttons">
       <posx>650</posx>
-      <posy>65</posy>
+      <posy>120</posy>
       <control type="button" id="1">
         <description>Ok Button</description>
         <posx>0</posx>

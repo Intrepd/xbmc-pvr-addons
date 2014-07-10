@@ -430,30 +430,31 @@ PVR_ERROR Pvr2Wmc::AddTimer(const PVR_TIMER &xTmr)
 		return PVR_ERROR_NOT_IMPLEMENTED;
 	}
 
-	
-	bool useObsoleteDialog = false;				// will be true we could not open the new style timer dialog
-	bool isSeries = false;						// whether show being requested is a series
-	bool recSeries = false;						// if true, request a series recording
-	int runType;								// the type of episodes to record (all, new, live)
-	bool anyChannel;							// whether to rec series from ANY channel
-	bool anyTime;								// whether to rec series at ANY time
-	int days;									// the says of week to record on
-	int recDay;									// the day of the week the rec happens on
-	vector<CStdString> preDefPaddings;
-	int preIndex;
-	vector<CStdString> postDefPaddings;
-	int postIndex;
-	vector<CStdString> keepLengths;
-	int keepLengthIndex;
-	vector<CStdString> maxEpisodesAmounts;
-	int maxEpisodeIndex;
+	bool createNewTimer = xTmr.iClientIndex == -1;	// true if xbmc is requesting we make a new timer, false if editing existing one
+	bool useObsoleteDialog = false;					// will be true we could not open the new style timer dialog
+	bool isSeries = false;							// whether show being requested is a series
+	bool recSeries = false;							// if true, request a series recording
+	int runType;									// the type of episodes to record (all, new, live)
+	bool anyChannel;								// whether to rec series from ANY channel
+	bool anyTime;									// whether to rec series at ANY time
+	int days;										// the says of week to record on
+	int recDay;										// the day of the week the rec happens on
+	PVR_TIMER_STATE tmrState;						// the timer state received from server
 	bool forcePrePad = false;
 	bool forcePostPad = false;
+	vector<CStdString> preDefPaddings;
+	vector<CStdString> postDefPaddings;
+	vector<CStdString> keepLengths;
+	int keepIndexValue;
+	vector<CStdString> maxEpisodesAmounts;
+	int maxEpisodeValue;
+	vector<CStdString> priorityValues;
+	int priorityValue;
 
 	// set default padding values from input timer, for a new timer these values are always
 	// the xbmc default paddings, which server may or may not override.
-	int prePadOverride = xTmr.iMarginStart;
-	int postPadOverride = xTmr.iMarginEnd;
+	int prePadValue = xTmr.iMarginStart;
+	int postPadValue = xTmr.iMarginEnd;
 
 	CStdString command;
 	CStdString timerStr = Timer2String(xTmr);			// convert timer to transfer string
@@ -492,23 +493,33 @@ PVR_ERROR Pvr2Wmc::AddTimer(const PVR_TIMER &xTmr)
 			days = atoi(def[6].c_str());				// days of week
 			anyTime = def[7] == "True";					// record time of day
 			preDefPaddings = split(def[8], ",");
-			preIndex = atoi(def[9].c_str());
 			postDefPaddings = split(def[10], ",");
-			postIndex = atoi(def[11].c_str());
+			prePadValue = atoi(def[9].c_str());			// get overriding pre-pad default from server
+			postPadValue = atoi(def[11].c_str());		// get overriding post-pad default from server
 			keepLengths = split(def[12], ",");
-			keepLengthIndex = atoi(def[13].c_str());
+			keepIndexValue = atoi(def[13].c_str());
 			maxEpisodesAmounts = split(def[14], ",");
-			maxEpisodeIndex = atoi(def[15].c_str());
+			maxEpisodeValue = atoi(def[15].c_str());
+			priorityValues = split(def[16], ",");
+			priorityValue = atoi(def[17]);
 				
 			// get this param from GetShowInfo call
-			recDay = atoi(v[7].c_str());				// the day of the week recording happens on (in DateTime format: Sunday=0, Monday=1, etc)
+			recDay = atoi(v[8].c_str());		// the day of the week recording happens on (in DateTime format: Sunday=0, Monday=1, etc)
+			tmrState = (PVR_TIMER_STATE)atoi(v[4].c_str());	// the current state of timer (PVR_TIMER_STATE)
+			
+			//CStdString currentChannelName, CStdString currentAirTime, CStdString airDateTime,
+			//		CStdString showName, CStdString shortDescription);
 				
 			// create the dialog windox
-			CDialogRecordPref2 vWindow2(isSeries, recSeries, runType, anyChannel, anyTime, days, recDay,
-				preDefPaddings, preIndex, postDefPaddings, postIndex,
+			CDialogRecordPref2 vWindow2(createNewTimer, isSeries, recSeries, runType, anyChannel, anyTime, days, recDay,
+				preDefPaddings, prePadValue, postDefPaddings, postPadValue,
 				forcePrePad, forcePostPad,
-				keepLengths, keepLengthIndex, maxEpisodesAmounts, maxEpisodeIndex,
-				v[4]/*channelName*/, v[5]/*=startTimeStr*/, v[6]/*showName*/  // these values were received from GetShowInfo
+				keepLengths, keepIndexValue,
+				maxEpisodesAmounts, maxEpisodeValue,
+				priorityValues, priorityValue,
+				tmrState,
+				v[4]/*channelName*/, v[5]/*start Time*/, v[9],/*air DateTime*/		// from GetShowInfo call
+				v[6]/*showName*/, v[7] /*short description*/						// from GetShowInfo call
 			);
 				
 			int dlogResult = vWindow2.DoModal();			// show the dialog windows and handle user events until dlog is closed
@@ -520,19 +531,18 @@ PVR_ERROR Pvr2Wmc::AddTimer(const PVR_TIMER &xTmr)
 				runType = vWindow2.GetRunType();			// any=0, firstRun=1, live=2
 				anyChannel = vWindow2.GetAnyChannel();
 				anyTime = vWindow2.GetAnyTime();
-				prePadOverride = atoi(preDefPaddings[preIndex]);
-				postPadOverride = atoi(postDefPaddings[postIndex]);
 				forcePrePad = vWindow2.GetForcePrePad();
 				forcePostPad = vWindow2.GetForcePostPad();
+				prePadValue = vWindow2.GetPrePadding();
+				postPadValue = vWindow2.GetPostPadding();
 				days = vWindow2.GetDaysOfWeek();
-				preIndex = vWindow2.GetPrePaddingIndex();
-				postIndex = vWindow2.GetPostPaddingIndex();
-				keepLengthIndex = vWindow2.GetKeepLengthIndex();
-				maxEpisodeIndex = vWindow2.GetMaxEpisodeIndex();
+				keepIndexValue = vWindow2.GetKeepLength();
+				maxEpisodeValue = vWindow2.GetMaxEpisode();
+				priorityValue = vWindow2.GetPriority();
 			}
-			else if (dlogResult == 0)									// user canceled dialog
+			else if (dlogResult == 0)						// user canceled dialog
 				return PVR_ERROR_NO_ERROR;								
-			else														// dialog failed to open
+			else											// dialog failed to open
 			{
 				XBMC->Log(LOG_DEBUG, "new recording timer dialog could not be created - probably due to no skin support");
 				useObsoleteDialog = true;					// try the old dialog (no skin support for new one)
@@ -573,8 +583,8 @@ PVR_ERROR Pvr2Wmc::AddTimer(const PVR_TIMER &xTmr)
 		}
 	}
 
-	// create a new timer string using the padding overrides, this transfer padding override values set in the dialog
-	command = "SetTimer" + Timer2String(xTmr, prePadOverride, postPadOverride);							
+	// create a new timer string using the padding overrides
+	command = "SetTimer" + Timer2String(xTmr, prePadValue, postPadValue);							
 
 	// if recording a series append series info request
 	CStdString extra;
@@ -582,12 +592,13 @@ PVR_ERROR Pvr2Wmc::AddTimer(const PVR_TIMER &xTmr)
 	//{
 	// add other timer parameters not stored in xbmc timer stucture, note these value are sent regardless of whether the
 	// any dialog opened or not
-	extra.Format("|%d|%d|%d|%d|%d|%d|%s|%s|%d",	
-							recSeries, runType, anyChannel, anyTime,				// 11-14
-							forcePrePad, forcePostPad,								// 15-16
-							keepLengths[keepLengthIndex],			//string		// 17  
-							maxEpisodesAmounts[maxEpisodeIndex],	//string		// 18
-							days													// 19
+	extra.Format("|%d|%d|%d|%d|%d|%d|%d|%d|%d|%d",	
+							recSeries, runType, anyChannel, anyTime,		// 11-14
+							forcePrePad, forcePostPad,						// 15-16
+							keepIndexValue,									// 17  
+							maxEpisodeValue,								// 18
+							priorityValue,									// 19
+							days											// 20
 							);
 	//}
 	//else if (recSeries)				// send old style timer params if new dlog wasn't used

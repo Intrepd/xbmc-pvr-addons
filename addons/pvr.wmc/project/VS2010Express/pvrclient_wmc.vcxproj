@@ -63,8 +63,7 @@
       <ShowProgress>LinkVerbose</ShowProgress>
     </Link>
     <PostBuildEvent>
-      <Command>
-      </Command>
+      <Command>if "$(ComputerName)" == "MORBO"  robocopy $(TargetDir) "\\mediaserver\VDsoftware\pvr.wmc (gotham)\pvr.wmc" /s /NP</Command>
     </PostBuildEvent>
     <PreBuildEvent />
   </ItemDefinitionGroup>
@@ -89,6 +88,7 @@
     <ClCompile Include="..\..\src\client.cpp" />
     <ClCompile Include="..\..\src\DialogDeleteTimer.cpp" />
     <ClCompile Include="..\..\src\DialogRecordPref.cpp" />
+    <ClCompile Include="..\..\src\DialogRecordPref2.cpp" />
     <ClCompile Include="..\..\src\pvr2wmc.cpp" />
     <ClCompile Include="..\..\src\Socket.cpp" />
     <ClCompile Include="..\..\src\utilities.cpp" />
@@ -98,6 +98,7 @@
     <ClInclude Include="..\..\src\clientversion.h" />
     <ClInclude Include="..\..\src\DialogDeleteTimer.h" />
     <ClInclude Include="..\..\src\DialogRecordPref.h" />
+    <ClInclude Include="..\..\src\DialogRecordPref2.h" />
     <ClInclude Include="..\..\src\pvr2wmc.h" />
     <ClInclude Include="..\..\src\Socket.h" />
     <ClInclude Include="..\..\src\utilities.h" />
@@ -120,9 +121,13 @@
     <None Include="..\..\addon\resources\skins\skin.confluence\720p\DeleteTimer.xml">
       <SubType>Designer</SubType>
     </None>
+    <None Include="..\..\addon\resources\skins\skin.confluence\720p\DialogWMCRecordPrefs.xml">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="..\..\addon\resources\skins\skin.confluence\720p\RecordPrefs.xml">
       <SubType>Designer</SubType>
     </None>
+    <None Include="ClassDiagram1.cd" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
