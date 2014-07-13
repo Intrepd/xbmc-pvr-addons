@@ -1094,9 +1094,12 @@ int Pvr2Wmc::ReadLiveStream(unsigned char *pBuffer, unsigned int iBufferSize)
 			}
 			else if (fileSize == -1)					// if fileSize -1, server is reporting an 'unkown' error with the stream
 			{
-				XBMC->QueueNotification(QUEUE_ERROR, XBMC->GetLocalizedString(30003));	// display generic error with stream
-				XBMC->Log(LOG_DEBUG, "live tv error, server reported error");
-				_lostStream = true;														// flag that stream is down
+				if (!CheckErrorOnServer())				// see if server posted what the error is
+				{										// if it didn't post a generic message
+					XBMC->QueueNotification(QUEUE_ERROR, XBMC->GetLocalizedString(30003));	// display generic error with stream
+					XBMC->Log(LOG_DEBUG, "live tv error, server reported error");
+				}
+				_lostStream = true;															// flag that stream is down
 				return -1;																
 			}
 

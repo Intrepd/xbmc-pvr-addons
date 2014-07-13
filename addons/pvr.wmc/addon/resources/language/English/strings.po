@@ -131,6 +131,14 @@ msgctxt "#30027"
 msgid "Time drift between client and backend of %s minutes"
 msgstr ""
 
+msgctxt "#30028"
+msgid "Out of disk space"
+msgstr ""
+
+msgctxt "#30029"
+msgid "Disk IO error"
+msgstr ""
+
 msgctxt "#30100"
 msgid "Recording Preference"
 msgstr ""
