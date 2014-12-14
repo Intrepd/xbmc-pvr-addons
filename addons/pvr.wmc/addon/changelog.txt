@@ -1,3 +1,11 @@
+0.2.100
+- backport of helix fixes/enhancements
+-- fix to XBMC->Log calls for clang compiler and general consistency
+-- fixed SignalStatus data
+-- add support for TriggerEPGUpdate
+-- tidy up display of PVR data (connection string, backend drive space total/used)
+-- add support for accepting HDHR streaming URLs for channels
+
 0.2.99
 - manually trigger recordings refresh after XBMC calls SetPlayedCount
 

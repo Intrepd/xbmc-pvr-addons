@@ -46,6 +46,9 @@ Pvr2Wmc::Pvr2Wmc(void)
 	_socketClient.SetClientName(g_strClientName);
 	_socketClient.SetServerPort(g_port);
 
+	_diskTotal = 0;
+	_diskUsed = 0;
+
 	_signalStatusCount = 0;			// for signal status display
 	_discardSignalStatus = false;
 
@@ -79,8 +82,9 @@ bool Pvr2Wmc::IsServerDown()
 	bool isServerDown = (results[0] != "True");								// true if server is down
 
 	// GetServiceStatus may return any updates requested by server
-	if (!isServerDown && results.size() > 1)								// if server is not down and it requests updates
+	if (!isServerDown && results.size() > 1)								// if server is not down and there are additional fields
 	{
+		ExtractDriveSpace(results);											// get drive space total/used from backend response
 		TriggerUpdates(results);											// send update array to trigger updates requested by server
 	}
 	return isServerDown;
@@ -101,9 +105,10 @@ const char *Pvr2Wmc::GetBackendVersion(void)
 		time_t now = time(NULL);
 		char datestr[32];
 		strftime(datestr, 32, "%Y-%m-%d %H:%M:%S", gmtime(&now));
-		
+
+		// Also send this client's setting for backend servername (so server knows how it is being accessed)
 		CStdString request;
-		request.Format("GetServerVersion|%s", datestr);
+		request.Format("GetServerVersion|%s|%s", datestr, g_strServerName.c_str());
 		vector<CStdString> results = _socketClient.GetVector(request, true);
 		if (results.size() > 0)
 		{
@@ -144,8 +149,19 @@ const char *Pvr2Wmc::GetBackendVersion(void)
 	return "Not accessible";	//  server version check failed
 }
 
+PVR_ERROR Pvr2Wmc::GetDriveSpace(long long *iTotal, long long *iUsed)
+{
+	*iTotal = _diskTotal;
+	*iUsed = _diskUsed;
+
+	return PVR_ERROR_NO_ERROR;
+}
+
 int Pvr2Wmc::GetChannelsAmount(void)
 {
+	if (IsServerDown())
+		return PVR_ERROR_SERVER_ERROR;
+
 	return _socketClient.GetInt("GetChannelCount", true);
 }
 
@@ -194,6 +210,14 @@ void Pvr2Wmc::TriggerUpdates(vector<CStdString> results)
 			PVR->TriggerChannelUpdate();
 		else if (v[0] == "updateChannelGroups")
 			PVR->TriggerChannelGroupsUpdate();
+		else if (v[0] == "updateEPGForChannel")
+		{
+			if (v.size() > 1)
+			{
+				unsigned int channelUid = strtoul(v[1].c_str(), 0, 10);
+				PVR->TriggerEpgUpdate(channelUid);
+			}
+		}
 		else if (v[0] == "message")
 		{
 			if (v.size() < 4)
@@ -202,7 +226,7 @@ void Pvr2Wmc::TriggerUpdates(vector<CStdString> results)
 				return;
 			}
 
-			XBMC->Log(LOG_INFO, "Received message from backend: %s", response);
+			XBMC->Log(LOG_INFO, "Received message from backend: %s", response->c_str());
 			CStdString infoStr;
 
 			// Get notification level
@@ -251,6 +275,31 @@ void Pvr2Wmc::TriggerUpdates(vector<CStdString> results)
 	}
 }
 
+void Pvr2Wmc::ExtractDriveSpace(vector<CStdString> results)
+{
+	FOREACH(response, results)
+	{
+		vector<CStdString> v = split(*response, "|");				// split to unpack string
+
+		if (v.size() < 1)
+		{
+			continue;
+		}
+
+		if (v[0] == "driveSpace")
+		{
+			if (v.size() > 1)
+			{
+				
+				long long totalSpace = strtoll(v[1].c_str(), 0, 10);
+				long long freeSpace = strtoll(v[2].c_str(), 0, 10);
+				long long usedSpace = strtoll(v[3].c_str(), 0, 10);
+				_diskTotal = totalSpace / 1024;
+				_diskUsed = usedSpace / 1024;
+			}
+		}
+	}
+}
 // xbmc call: get all channels for either tv or radio
 PVR_ERROR Pvr2Wmc::GetChannels(ADDON_HANDLE handle, bool bRadio)
 {
@@ -269,9 +318,9 @@ PVR_ERROR Pvr2Wmc::GetChannels(ADDON_HANDLE handle, bool bRadio)
 		vector<CStdString> v = split(*response, "|");
 		// packing: id, bradio, c.OriginalNumber, c.CallSign, c.IsEncrypted, imageStr, c.IsBlocked
 
-		if (v.size() < 7)
+		if (v.size() < 9)
 		{
-			XBMC->Log(LOG_DEBUG, "Wrong number of fields xfered for channel group data");
+			XBMC->Log(LOG_DEBUG, "Wrong number of fields xfered for channel data");
 			continue;
 		}
 
@@ -279,13 +328,16 @@ PVR_ERROR Pvr2Wmc::GetChannels(ADDON_HANDLE handle, bool bRadio)
 		xChannel.bIsRadio = Str2Bool(v[1]);
 		xChannel.iChannelNumber = atoi(v[2].c_str());
 		STRCPY(xChannel.strChannelName,  v[3].c_str());
-		//CStdString test = "C:\\Users\\Public\\Recorded TV\\dump.mpg";
-		//STRCPY(xChannel.strStreamURL,  test.c_str());
-		//STRCPY(xChannel.strInputFormat, "video/wtv");
 		xChannel.iEncryptionSystem = Str2Bool(v[4]);
 		if (v[5].compare("NULL") != 0)										// if icon path is null
 			STRCPY(xChannel.strIconPath,  v[5].c_str()); 
 		xChannel.bIsHidden = Str2Bool(v[6]);
+
+		// Populate Stream DLNA URL if present
+		if (v.size() >= 10 && v[9] != "")
+		{
+			STRCPY(xChannel.strStreamURL, v[9].c_str());
+		}
 
 		PVR->TransferChannelEntry(handle, &xChannel);
 	}
@@ -294,6 +346,9 @@ PVR_ERROR Pvr2Wmc::GetChannels(ADDON_HANDLE handle, bool bRadio)
 
 int Pvr2Wmc::GetChannelGroupsAmount(void)
 {
+	if (IsServerDown())
+		return PVR_ERROR_SERVER_ERROR;
+
 	return _socketClient.GetInt("GetChannelGroupCount", true);
 }
 
@@ -415,6 +470,9 @@ PVR_ERROR Pvr2Wmc::GetEPGForChannel(ADDON_HANDLE handle, const PVR_CHANNEL &chan
 // timer functions -------------------------------------------------------------
 int Pvr2Wmc::GetTimersAmount(void)
 {
+	if (IsServerDown())
+		return PVR_ERROR_SERVER_ERROR;
+
 	return _socketClient.GetInt("GetTimerCount", true);
 }
 
@@ -670,6 +728,9 @@ PVR_ERROR Pvr2Wmc::GetTimers(ADDON_HANDLE handle)
 // recording functions ------------------------------------------------------------------------
 int Pvr2Wmc::GetRecordingsAmount(void)
 {
+	if (IsServerDown())
+		return PVR_ERROR_SERVER_ERROR;
+
 	return _socketClient.GetInt("GetRecordingsAmount", true);
 }
 
@@ -785,6 +846,9 @@ PVR_ERROR Pvr2Wmc::RenameRecording(const PVR_RECORDING &recording)
 // set the recording resume position in the wmc database
 PVR_ERROR Pvr2Wmc::SetRecordingLastPlayedPosition(const PVR_RECORDING &recording, int lastplayedposition)
 {
+	if (IsServerDown())
+		return PVR_ERROR_SERVER_ERROR;
+
 	CStdString command;
 	command.Format("SetResumePosition|%s|%d", recording.strRecordingId, lastplayedposition);
 	vector<CStdString> results = _socketClient.GetVector(command, true);					
@@ -797,6 +861,9 @@ PVR_ERROR Pvr2Wmc::SetRecordingLastPlayedPosition(const PVR_RECORDING &recording
 // the return value is ignored by the xbmc player.  That's why TriggerRecordingUpdate is required in the setting above
 int Pvr2Wmc::GetRecordingLastPlayedPosition(const PVR_RECORDING &recording)
 {
+	if (IsServerDown())
+		return PVR_ERROR_SERVER_ERROR;
+
 	CStdString command;
 	command.Format("GetResumePosition|%s", recording.strRecordingId); 
 	int pos = _socketClient.GetInt(command, true);
@@ -806,6 +873,9 @@ int Pvr2Wmc::GetRecordingLastPlayedPosition(const PVR_RECORDING &recording)
 // set the recording playcount in the wmc database
 PVR_ERROR Pvr2Wmc::SetRecordingPlayCount(const PVR_RECORDING &recording, int count)
 {
+	if (IsServerDown())
+		return PVR_ERROR_SERVER_ERROR;
+
 	CStdString command;
 	command.Format("SetPlayCount|%s|%d", recording.strRecordingId, count);
 	vector<CStdString> results = _socketClient.GetVector(command, true);					
@@ -848,9 +918,9 @@ bool Pvr2Wmc::OpenLiveStream(const PVR_CHANNEL &channel)
 		_streamWTV = EndsWith(results[0], "wtv");					// true if stream file is a wtv file
 
 		if (results.size() > 1)
-			XBMC->Log(LOG_DEBUG, "OpenLiveStream> opening stream: " + results[1]);		// log password safe path of client if available
+			XBMC->Log(LOG_DEBUG, "OpenLiveStream> opening stream: %s", results[1].c_str());		// log password safe path of client if available
 		else
-			XBMC->Log(LOG_DEBUG, "OpenLiveStream> opening stream: " + _streamFileName);	
+			XBMC->Log(LOG_DEBUG, "OpenLiveStream> opening stream: %s", _streamFileName.c_str());
 		
 		// Initialise variables for starting stream at an offset
 		_initialStreamResetCnt = 0;
@@ -1155,12 +1225,12 @@ bool Pvr2Wmc::OpenRecordedStream(const PVR_RECORDING &recording)
 
 		// hand additional args from server
 		if (results.size() >  1)
-			XBMC->Log(LOG_DEBUG, "OpenRecordedStream> rec stream type: " + results[1]);		// either a 'passive' or 'active' WTV OR a TS file
+			XBMC->Log(LOG_DEBUG, "OpenRecordedStream> rec stream type: %s", results[1].c_str());		// either a 'passive' or 'active' WTV OR a TS file
 		
 		if (results.size() > 2)
-			XBMC->Log(LOG_DEBUG, "OpenRecordedStream> opening stream: " + results[2]);		// log password safe path of client if available
+			XBMC->Log(LOG_DEBUG, "OpenRecordedStream> opening stream: %s", results[2].c_str());		// log password safe path of client if available
 		else
-			XBMC->Log(LOG_DEBUG, "OpenRecordedStream> opening stream: " + _streamFileName);	
+			XBMC->Log(LOG_DEBUG, "OpenRecordedStream> opening stream: %s", _streamFileName.c_str());	
 
 		if (results.size() > 3 && results[3] != "")											// get header to set duration of ts file
 		{
@@ -1205,9 +1275,6 @@ bool Pvr2Wmc::OpenRecordedStream(const PVR_RECORDING &recording)
 
 PVR_ERROR Pvr2Wmc::SignalStatus(PVR_SIGNAL_STATUS &signalStatus)
 {
-	if (IsServerDown())
-		return PVR_ERROR_SERVER_ERROR;
-
 	if (!g_bSignalEnable || _discardSignalStatus)
 	{
 		return PVR_ERROR_NO_ERROR;
@@ -1218,6 +1285,9 @@ PVR_ERROR Pvr2Wmc::SignalStatus(PVR_SIGNAL_STATUS &signalStatus)
 	// Only send request to backend every N times
 	if (_signalStatusCount-- <= 0)
 	{
+		if (IsServerDown())
+			return PVR_ERROR_SERVER_ERROR;
+
       // Reset count to throttle value
 		_signalStatusCount = g_signalThrottle;
 
@@ -1238,14 +1308,14 @@ PVR_ERROR Pvr2Wmc::SignalStatus(PVR_SIGNAL_STATUS &signalStatus)
 			if (results.size() >= 9)
 			{
 				memset(&cachedSignalStatus, 0, sizeof(cachedSignalStatus));
-				snprintf(signalStatus.strAdapterName, sizeof(signalStatus.strAdapterName), results[0]);
-				snprintf(signalStatus.strAdapterStatus, sizeof(signalStatus.strAdapterStatus), results[1]);
-				snprintf(signalStatus.strProviderName, sizeof(signalStatus.strProviderName), results[2]);
-				snprintf(signalStatus.strServiceName, sizeof(signalStatus.strServiceName), results[3]);
-				snprintf(signalStatus.strMuxName, sizeof(signalStatus.strMuxName), results[4]);
-				signalStatus.iSignal = atoi(results[5]) * 655.35;
-				signalStatus.dVideoBitrate = atof(results[6]);
-				signalStatus.dAudioBitrate = atof(results[7]);
+				snprintf(cachedSignalStatus.strAdapterName, sizeof(cachedSignalStatus.strAdapterName), "%s", results[0].c_str());
+				snprintf(cachedSignalStatus.strAdapterStatus, sizeof(cachedSignalStatus.strAdapterStatus), "%s", results[1].c_str());
+				snprintf(cachedSignalStatus.strProviderName, sizeof(cachedSignalStatus.strProviderName), "%s", results[2].c_str());
+				snprintf(cachedSignalStatus.strServiceName, sizeof(cachedSignalStatus.strServiceName), "%s", results[3].c_str());
+				snprintf(cachedSignalStatus.strMuxName, sizeof(cachedSignalStatus.strMuxName), "%s", results[4].c_str());
+				cachedSignalStatus.iSignal = (int)(atoi(results[5]) * 655.35);
+				cachedSignalStatus.dVideoBitrate = atof(results[6]);
+				cachedSignalStatus.dAudioBitrate = atof(results[7]);
 			
 				bool error = atoi(results[8]) == 1;
 				if (error)
